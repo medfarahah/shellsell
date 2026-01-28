@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 // GET /api/coupons?code=&onlyPublic=&forNewUser=&forMember=
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

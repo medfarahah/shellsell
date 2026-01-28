@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 // GET /api/addresses?userId=
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
