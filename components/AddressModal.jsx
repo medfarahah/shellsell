@@ -2,8 +2,13 @@
 import { XIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
+import { useUser } from "@clerk/nextjs"
+import { useDispatch } from "react-redux"
+import { addAddress } from "@/lib/features/address/addressSlice"
 
-const AddressModal = ({ setShowAddressModal }) => {
+const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
+    const { user } = useUser()
+    const dispatch = useDispatch()
 
     const [address, setAddress] = useState({
         name: '',
@@ -27,9 +32,73 @@ const AddressModal = ({ setShowAddressModal }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        // Here you would typically send to API
-        console.log("Submitting Address:", address)
-        setShowAddressModal(false)
+        
+        if (!user) {
+            toast.error("Please sign in to add an address")
+            return
+        }
+
+        // Validate required fields
+        if (!address.name.trim() || !address.email.trim() || !address.phone.trim()) {
+            toast.error("Please fill in all required fields")
+            return
+        }
+
+        try {
+            const res = await fetch("/api/addresses", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    name: address.name.trim(),
+                    email: address.email.trim(),
+                    phone: address.phone.trim(),
+                    whatsapp: address.whatsapp.trim() || null,
+                    quartier: address.quartier.trim() || null,
+                    street: address.street.trim() || null,
+                    city: address.city.trim() || null,
+                    state: address.state.trim() || null,
+                    zip: address.zip.trim() || null,
+                    country: address.country.trim() || null,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to add address")
+            }
+
+            // Add to Redux state
+            dispatch(addAddress(data))
+            
+            // Callback to refresh addresses in parent component
+            if (onAddressAdded) {
+                onAddressAdded();
+            }
+            
+            toast.success("Address added successfully!")
+            setShowAddressModal(false)
+            
+            // Reset form
+            setAddress({
+                name: '',
+                email: '',
+                phone: '',
+                whatsapp: '',
+                quartier: '',
+                street: '',
+                city: '',
+                state: '',
+                zip: '',
+                country: '',
+            })
+        } catch (err) {
+            console.error("Address creation error:", err)
+            toast.error(err.message || "Failed to add address")
+        }
     }
 
     return (

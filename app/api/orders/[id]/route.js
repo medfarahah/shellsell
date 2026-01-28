@@ -6,9 +6,26 @@ export const runtime = 'nodejs';
 // PATCH /api/orders/[id] - update order status
 export async function PATCH(request, { params }) {
   try {
-    const { id } = params;
-    const body = await request.json();
-    const { status } = body;
+    // Handle both sync and async params (Next.js 15+ compatibility)
+    const resolvedParams = params instanceof Promise ? await params : params;
+    const paramId = resolvedParams?.id;
+
+    let body = null;
+    try {
+      body = await request.json();
+    } catch {
+      body = null;
+    }
+
+    const { status, id: bodyId } = body || {};
+    const id = paramId || bodyId;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Order ID is required' },
+        { status: 400 },
+      );
+    }
 
     if (!status) {
       return NextResponse.json(

@@ -1,13 +1,30 @@
 'use client';
-import { Home, ShoppingBag, ShoppingCart, User } from "lucide-react";
+import { Home, ShoppingBag, ShoppingCart, User, Package } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { useState, useRef, useEffect } from "react";
 
 const BottomNav = () => {
     const pathname = usePathname();
     const cartCount = useSelector((state) => state.cart.total);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const navItems = [
         { name: "Home", href: "/", icon: Home },
@@ -61,8 +78,31 @@ const BottomNav = () => {
                         </SignInButton>
                     </SignedOut>
                     <SignedIn>
-                        <UserButton appearance={{ elements: { avatarBox: "w-6 h-6" } }} />
-                        <span className="text-[10px] font-medium">Account</span>
+                        <div className="flex flex-col items-center justify-center space-y-1 w-full h-full">
+                            <UserButton 
+                                appearance={{
+                                    elements: {
+                                        avatarBox: "w-6 h-6",
+                                        userButtonPopoverCard: "shadow-lg",
+                                    }
+                                }}
+                                afterSignOutUrl="/"
+                            >
+                                <UserButton.MenuItems>
+                                    <UserButton.Link
+                                        label="My Orders"
+                                        labelIcon={<Package size={16} />}
+                                        href="/orders"
+                                    />
+                                    <UserButton.Link
+                                        label="My Account"
+                                        labelIcon={<User size={16} />}
+                                        href="/account"
+                                    />
+                                </UserButton.MenuItems>
+                            </UserButton>
+                            <span className="text-[10px] font-medium">Account</span>
+                        </div>
                     </SignedIn>
                 </div>
             </div>

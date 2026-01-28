@@ -1,17 +1,35 @@
 'use client'
-import { Search, ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, User, Package, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 const Navbar = () => {
 
     const router = useRouter();
+    const pathname = usePathname();
+    const { user } = useUser();
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
 
     const [search, setSearch] = useState('')
     const cartCount = useSelector(state => state.cart.total)
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault()
@@ -56,7 +74,28 @@ const Navbar = () => {
                             </SignInButton>
                         </SignedOut>
                         <SignedIn>
-                            <UserButton />
+                            <UserButton 
+                                appearance={{
+                                    elements: {
+                                        avatarBox: "w-8 h-8",
+                                        userButtonPopoverCard: "shadow-lg",
+                                    }
+                                }}
+                                afterSignOutUrl="/"
+                            >
+                                <UserButton.MenuItems>
+                                    <UserButton.Link
+                                        label="My Orders"
+                                        labelIcon={<Package size={16} />}
+                                        href="/orders"
+                                    />
+                                    <UserButton.Link
+                                        label="My Account"
+                                        labelIcon={<User size={16} />}
+                                        href="/account"
+                                    />
+                                </UserButton.MenuItems>
+                            </UserButton>
                         </SignedIn>
 
                     </div>

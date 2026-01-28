@@ -1,15 +1,20 @@
 import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AddressModal from './AddressModal';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setAddresses } from '@/lib/features/address/addressSlice';
+import { clearCart } from '@/lib/features/cart/cartSlice';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const router = useRouter();
+    const { user } = useUser();
+    const dispatch = useDispatch();
 
     const addressList = useSelector(state => state.address.list);
 
@@ -17,17 +22,154 @@ const OrderSummary = ({ totalPrice, items }) => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [couponCodeInput, setCouponCodeInput] = useState('');
-    const [coupon, setCoupon] = useState('');
+    const [coupon, setCoupon] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // Fetch addresses when component mounts
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            if (!user) return;
+            
+            try {
+                const res = await fetch(`/api/addresses?userId=${user.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    dispatch(setAddresses(data));
+                }
+            } catch (err) {
+                console.error("Failed to fetch addresses:", err);
+            }
+        };
+
+        fetchAddresses();
+    }, [user, dispatch]);
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
         
+        if (!couponCodeInput.trim()) {
+            toast.error("Please enter a coupon code");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&onlyPublic=true`);
+            if (!res.ok) {
+                throw new Error("Coupon not found");
+            }
+
+            const coupons = await res.json();
+            if (coupons.length === 0) {
+                toast.error("Invalid or expired coupon code");
+                return;
+            }
+
+            const foundCoupon = coupons[0];
+            
+            // Check if coupon is expired
+            if (new Date(foundCoupon.expiresAt) < new Date()) {
+                toast.error("This coupon has expired");
+                return;
+            }
+
+            setCoupon(foundCoupon);
+            toast.success("Coupon applied successfully!");
+            setCouponCodeInput("");
+        } catch (err) {
+            console.error("Coupon validation error:", err);
+            toast.error(err.message || "Invalid coupon code");
+        }
     }
 
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
-        router.push('/orders')
+        if (!user) {
+            toast.error("Please sign in to place an order");
+            return;
+        }
+
+        if (items.length === 0) {
+            toast.error("Your cart is empty");
+            return;
+        }
+
+        if (!selectedAddress) {
+            toast.error("Please select or add an address");
+            return;
+        }
+
+        // Group items by store (since each product belongs to a store)
+        const itemsByStore = {};
+        for (const item of items) {
+            // Get storeId from product's store relation or direct storeId field
+            const storeId = item.storeId || item.store?.id;
+            
+            if (!storeId) {
+                toast.error(`Product ${item.name} is missing store information`);
+                setLoading(false);
+                return;
+            }
+            
+            if (!itemsByStore[storeId]) {
+                itemsByStore[storeId] = [];
+            }
+            itemsByStore[storeId].push({
+                productId: item.id,
+                quantity: item.quantity,
+                price: item.price,
+            });
+        }
+
+        setLoading(true);
+
+        try {
+            // Create orders for each store
+            const orderPromises = Object.entries(itemsByStore).map(async ([storeId, storeItems]) => {
+                const storeTotal = storeItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const finalTotal = coupon 
+                    ? storeTotal - (coupon.discount / 100 * storeTotal)
+                    : storeTotal;
+
+                const res = await fetch("/api/orders", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        total: finalTotal,
+                        userId: user.id,
+                        storeId: storeId,
+                        addressId: selectedAddress.id,
+                        isPaid: paymentMethod === 'STRIPE', // Only STRIPE is paid, COD is not
+                        paymentMethod: paymentMethod,
+                        isCouponUsed: !!coupon,
+                        coupon: coupon || {},
+                        orderItems: storeItems,
+                    }),
+                });
+
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || "Failed to create order");
+                }
+
+                return res.json();
+            });
+
+            await Promise.all(orderPromises);
+
+            // Clear cart
+            dispatch(clearCart());
+            
+            toast.success("Order placed successfully!");
+            router.push('/orders');
+        } catch (err) {
+            console.error("Order creation error:", err);
+            toast.error(err.message || "Failed to place order");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -47,18 +189,35 @@ const OrderSummary = ({ totalPrice, items }) => {
                 {
                     selectedAddress ? (
                         <div className='flex gap-2 items-center'>
-                            <p>{selectedAddress.name}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.zip}</p>
+                            <p>
+                                {selectedAddress.name}
+                                {selectedAddress.quartier && `, ${selectedAddress.quartier}`}
+                                {selectedAddress.city && `, ${selectedAddress.city}`}
+                                {selectedAddress.state && `, ${selectedAddress.state}`}
+                                {selectedAddress.zip && `, ${selectedAddress.zip}`}
+                            </p>
                             <SquarePenIcon onClick={() => setSelectedAddress(null)} className='cursor-pointer' size={18} />
                         </div>
                     ) : (
                         <div>
                             {
                                 addressList.length > 0 && (
-                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' onChange={(e) => setSelectedAddress(addressList[e.target.value])} >
+                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' onChange={(e) => {
+                                        const index = parseInt(e.target.value);
+                                        if (index >= 0 && index < addressList.length) {
+                                            setSelectedAddress(addressList[index]);
+                                        }
+                                    }} >
                                         <option value="">Select Address</option>
                                         {
                                             addressList.map((address, index) => (
-                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+                                                <option key={address.id || index} value={index}>
+                                                    {address.name}
+                                                    {address.quartier && `, ${address.quartier}`}
+                                                    {address.city && `, ${address.city}`}
+                                                    {address.state && `, ${address.state}`}
+                                                    {address.zip && `, ${address.zip}`}
+                                                </option>
                                             ))
                                         }
                                     </select>
@@ -101,9 +260,33 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <p>Total:</p>
                 <p className='font-medium text-right'>{currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}</p>
             </div>
-            <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'placing Order...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Place Order</button>
+            <button 
+                onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'Placing order...', success: 'Order placed!', error: 'Failed to place order' })} 
+                disabled={loading || !selectedAddress || items.length === 0}
+                className={`w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all ${(loading || !selectedAddress || items.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                {loading ? 'Placing Order...' : 'Place Order'}
+            </button>
 
-            {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}
+            {showAddressModal && (
+                <AddressModal 
+                    setShowAddressModal={setShowAddressModal} 
+                    onAddressAdded={async () => {
+                        // Refresh addresses after adding new one
+                        if (user) {
+                            try {
+                                const res = await fetch(`/api/addresses?userId=${user.id}`);
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    dispatch(setAddresses(data));
+                                }
+                            } catch (err) {
+                                console.error("Failed to refresh addresses:", err);
+                            }
+                        }
+                    }}
+                />
+            )}
 
         </div>
     )
