@@ -21,6 +21,7 @@ export default function StoreAddProduct() {
         category: "",
     })
     const [loading, setLoading] = useState(false)
+    const [generatingDescription, setGeneratingDescription] = useState(false)
     const [storeId, setStoreId] = useState(null)
 
     const convertImageToBase64 = (file) => {
@@ -75,7 +76,7 @@ export default function StoreAddProduct() {
             return
         }
         if (!productInfo.description.trim()) {
-            toast.error("Please enter a product description")
+            toast.error("Please enter a product description (you can use the AI button to generate one)")
             return
         }
         if (!productInfo.category) {
@@ -150,6 +151,46 @@ export default function StoreAddProduct() {
         }
     }
 
+    const handleGenerateDescription = async () => {
+        if (!productInfo.name.trim()) {
+            toast.error("Please enter a product name first")
+            return
+        }
+
+        try {
+            setGeneratingDescription(true)
+
+            const res = await fetch("/api/ai/generate-description", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: productInfo.name.trim(),
+                    category: productInfo.category || undefined,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to generate description")
+            }
+
+            setProductInfo(prev => ({
+                ...prev,
+                description: data.description,
+            }))
+
+            toast.success("AI description generated")
+        } catch (err) {
+            console.error("AI description error:", err)
+            toast.error(err.message || "Failed to generate description")
+        } finally {
+            setGeneratingDescription(false)
+        }
+    }
+
 
     return (
         <form onSubmit={e => toast.promise(onSubmitHandler(e), { loading: "Adding Product..." })} className="text-slate-500 mb-28">
@@ -167,13 +208,41 @@ export default function StoreAddProduct() {
 
             <label htmlFor="" className="flex flex-col gap-2 my-6 ">
                 Name
-                <input type="text" name="name" onChange={onChangeHandler} value={productInfo.name} placeholder="Enter product name" className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" required />
+                <input
+                    type="text"
+                    name="name"
+                    onChange={onChangeHandler}
+                    value={productInfo.name}
+                    placeholder="Enter product name"
+                    className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded"
+                    required
+                />
             </label>
 
-            <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-                Description
-                <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
-            </label>
+            <div className="flex flex-col gap-2 my-6 max-w-sm">
+                <div className="flex items-center justify-between">
+                    <label className="flex flex-col gap-1">
+                        <span>Description</span>
+                    </label>
+                    <button
+                        type="button"
+                        onClick={handleGenerateDescription}
+                        disabled={generatingDescription}
+                        className="text-xs px-3 py-1 rounded-full border border-slate-300 text-slate-600 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                        {generatingDescription ? "Generating..." : "Generate with AI"}
+                    </button>
+                </div>
+                <textarea
+                    name="description"
+                    onChange={onChangeHandler}
+                    value={productInfo.description}
+                    placeholder="Enter product description or use AI"
+                    rows={5}
+                    className="w-full p-2 px-4 outline-none border border-slate-200 rounded resize-none"
+                    required
+                />
+            </div>
 
             <div className="flex gap-5">
                 <label htmlFor="" className="flex flex-col gap-2 ">
