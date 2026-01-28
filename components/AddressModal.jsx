@@ -54,6 +54,7 @@ const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
                     userId: user.id,
                     name: address.name.trim(),
                     email: address.email.trim(),
+                    userImage: user.imageUrl || "",
                     phone: address.phone.trim(),
                     whatsapp: address.whatsapp.trim() || null,
                     quartier: address.quartier.trim() || null,

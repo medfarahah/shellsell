@@ -38,6 +38,7 @@ export async function POST(request) {
       userId,
       name,
       email,
+      userImage,
       street,
       city,
       state,
@@ -53,6 +54,26 @@ export async function POST(request) {
         { error: 'Missing required fields' },
         { status: 400 },
       );
+    }
+
+    // Ensure the user exists in the database (needed for the Address FK)
+    try {
+      await prisma.user.upsert({
+        where: { id: userId },
+        update: {
+          name,
+          email,
+          image: userImage || '',
+        },
+        create: {
+          id: userId,
+          name,
+          email,
+          image: userImage || '',
+        },
+      });
+    } catch (userError) {
+      console.error('POST /api/addresses user upsert error', userError);
     }
 
     const address = await prisma.address.create({
