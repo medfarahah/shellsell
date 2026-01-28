@@ -10,7 +10,8 @@ export default function AdminStores() {
 
     const fetchStores = async () => {
         try {
-            const res = await fetch("/api/stores");
+            // Fetch all stores (not filtered by isActive) for admin
+            const res = await fetch("/api/stores?status=all");
             if (!res.ok) throw new Error("Failed to load stores");
             const data = await res.json();
             setStores(data);
@@ -22,8 +23,27 @@ export default function AdminStores() {
     };
 
     const toggleIsActive = async (storeId) => {
-        // Implement via a dedicated API route
-        console.warn("Toggle isActive not implemented", storeId);
+        try {
+            const store = stores.find(s => s.id === storeId);
+            if (!store) throw new Error("Store not found");
+
+            const res = await fetch(`/api/stores/${storeId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isActive: !store.isActive, userId: store.userId }),
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || "Failed to update store");
+            }
+
+            const updatedStore = await res.json();
+            setStores(stores.map(s => s.id === storeId ? updatedStore : s));
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     useEffect(() => {

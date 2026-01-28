@@ -21,9 +21,25 @@ export default function AdminApprove() {
         }
     };
 
-    const handleApprove = async ({ storeId, status }) => {
-        // Implement via a dedicated API route
-        console.warn("Handle approve not implemented", { storeId, status });
+    const handleApprove = async ({ storeId, status, userId }) => {
+        try {
+            const res = await fetch(`/api/stores/${storeId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status, userId }),
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || "Failed to update store");
+            }
+
+            // Remove the store from the list after approval/rejection
+            setStores(stores.filter(s => s.id !== storeId));
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     useEffect(() => {
@@ -55,6 +71,7 @@ export default function AdminApprove() {
                                             handleApprove({
                                                 storeId: store.id,
                                                 status: "approved",
+                                                userId: store.userId,
                                             }),
                                             { loading: "approving" }
                                         )
@@ -69,6 +86,7 @@ export default function AdminApprove() {
                                             handleApprove({
                                                 storeId: store.id,
                                                 status: "rejected",
+                                                userId: store.userId,
                                             }),
                                             { loading: "rejecting" }
                                         )

@@ -18,8 +18,14 @@ export async function GET(request) {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        orderItems: true,
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
         address: true,
+        user: true,
+        store: true,
       },
     });
     return NextResponse.json(orders);

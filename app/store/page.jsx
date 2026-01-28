@@ -130,74 +130,90 @@ export default function Dashboard() {
                 ))}
             </div>
 
-            <h2>Total Reviews</h2>
+            <h2 className="text-xl mt-10 mb-5">Total Reviews</h2>
 
             <div className="mt-5">
-                {dashboardData.ratings.map((review, index) => (
-                    <div
-                        key={index}
-                        className="flex max-sm:flex-col gap-5 sm:items-center justify-between py-6 border-b border-slate-200 text-sm text-slate-600 max-w-4xl"
-                    >
-                        <div>
-                            <div className="flex gap-3">
-                                <Image
-                                    src={review.user.image}
-                                    alt=""
-                                    className="w-10 aspect-square rounded-full"
-                                    width={100}
-                                    height={100}
-                                />
-                                <div>
-                                    <p className="font-medium">
-                                        {review.user.name}
-                                    </p>
-                                    <p className="font-light text-slate-500">
-                                        {new Date(
-                                            review.createdAt
-                                        ).toDateString()}
-                                    </p>
-                                </div>
-                            </div>
-                            <p className="mt-3 text-slate-500 max-w-xs leading-6">
-                                {review.review}
-                            </p>
-                        </div>
-                        <div className="flex flex-col justify-between gap-6 sm:items-end">
-                            <div className="flex flex-col sm:items-end">
-                                <p className="text-slate-400">
-                                    {review.product?.category}
-                                </p>
-                                <p className="font-medium">
-                                    {review.product?.name}
-                                </p>
-                                <div className="flex items-center">
-                                    {Array(5)
-                                        .fill("")
-                                        .map((_, index) => (
-                                            <StarIcon
-                                                key={index}
-                                                size={17}
-                                                className="text-transparent mt-0.5"
-                                                fill={
-                                                    review.rating >= index + 1
-                                                        ? "#00C950"
-                                                        : "#D1D5DB"
-                                                }
-                                            />
-                                        ))}
-                                </div>
-                            </div>
-                            <button
-                                onClick={() =>
-                                    router.push(`/product/${review.product.id}`)
-                                }
-                                className="bg-slate-100 px-5 py-2 hover:bg-slate-200 rounded transition-all"
-                            >
-                                View Product
-                            </button>
-                        </div>
+                {dashboardData.ratings.length === 0 ? (
+                    <div className="flex items-center justify-center h-40 text-slate-400">
+                        <p>No reviews yet</p>
                     </div>
-                ))}
+                ) : (
+                    dashboardData.ratings.map((review, index) => {
+                        // Default placeholder avatar
+                        const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23e5e7eb'/%3E%3Ctext x='20' y='26' font-size='16' text-anchor='middle' fill='%239ca3af'%3E%3F%3C/text%3E%3C/svg%3E";
+                        const userImage = review.user?.image && review.user.image.trim() !== '' 
+                            ? review.user.image 
+                            : defaultAvatar;
+                        
+                        return (
+                            <div
+                                key={review.id || index}
+                                className="flex max-sm:flex-col gap-5 sm:items-center justify-between py-6 border-b border-slate-200 text-sm text-slate-600 max-w-4xl"
+                            >
+                                <div>
+                                    <div className="flex gap-3">
+                                        <Image
+                                            src={userImage}
+                                            alt={review.user?.name || 'User'}
+                                            className="w-10 aspect-square rounded-full"
+                                            width={40}
+                                            height={40}
+                                        />
+                                        <div>
+                                            <p className="font-medium">
+                                                {review.user?.name || 'Anonymous'}
+                                            </p>
+                                            <p className="font-light text-slate-500">
+                                                {new Date(
+                                                    review.createdAt
+                                                ).toDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <p className="mt-3 text-slate-500 max-w-xs leading-6">
+                                        {review.review}
+                                    </p>
+                                </div>
+                                <div className="flex flex-col justify-between gap-6 sm:items-end">
+                                    <div className="flex flex-col sm:items-end">
+                                        <p className="text-slate-400">
+                                            {review.product?.category || 'N/A'}
+                                        </p>
+                                        <p className="font-medium">
+                                            {review.product?.name || 'Product'}
+                                        </p>
+                                        <div className="flex items-center">
+                                            {Array(5)
+                                                .fill("")
+                                                .map((_, index) => (
+                                                    <StarIcon
+                                                        key={index}
+                                                        size={17}
+                                                        className="text-transparent mt-0.5"
+                                                        fill={
+                                                            review.rating >= index + 1
+                                                                ? "#00C950"
+                                                                : "#D1D5DB"
+                                                        }
+                                                    />
+                                                ))}
+                                        </div>
+                                    </div>
+                                    {review.product?.id && (
+                                        <button
+                                            onClick={() =>
+                                                router.push(`/product/${review.product.id}`)
+                                            }
+                                            className="bg-slate-100 px-5 py-2 hover:bg-slate-200 rounded transition-all"
+                                        >
+                                            View Product
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );

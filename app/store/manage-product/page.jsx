@@ -92,18 +92,19 @@ export default function StoreManageProducts() {
                         >
                             <td className="px-4 py-3">
                                 <div className="flex gap-2 items-center">
-                                    <Image
-                                        width={40}
-                                        height={40}
-                                        className="p-1 shadow rounded cursor-pointer"
-                                        src={
-                                            typeof product.images[0] ===
-                                            "string"
-                                                ? product.images[0]
-                                                : product.images[0].src
-                                        }
-                                        alt=""
-                                    />
+                                    {product.images && product.images.length > 0 && (
+                                        <Image
+                                            width={40}
+                                            height={40}
+                                            className="p-1 shadow rounded cursor-pointer object-cover"
+                                            src={
+                                                typeof product.images[0] === "string"
+                                                    ? product.images[0]
+                                                    : product.images[0]?.src || ""
+                                            }
+                                            alt={product.name}
+                                        />
+                                    )}
                                     {product.name}
                                 </div>
                             </td>

@@ -1,10 +1,14 @@
 'use client'
 import { assets } from "@/assets/assets"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
+import { useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 export default function StoreAddProduct() {
+    const { user } = useUser()
+    const router = useRouter()
 
     const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Health', 'Toys & Games', 'Sports & Outdoors', 'Books & Media', 'Food & Drink', 'Hobbies & Crafts', 'Others']
 
@@ -17,16 +21,133 @@ export default function StoreAddProduct() {
         category: "",
     })
     const [loading, setLoading] = useState(false)
+    const [storeId, setStoreId] = useState(null)
 
+    const convertImageToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onload = () => resolve(reader.result)
+            reader.onerror = (error) => reject(error)
+        })
+    }
+
+    const fetchStore = async () => {
+        if (!user) return
+        try {
+            const res = await fetch(`/api/stores?userId=${user.id}`)
+            if (!res.ok) throw new Error("Failed to load store")
+            const stores = await res.json()
+            const store = stores[0]
+            if (store) {
+                setStoreId(store.id)
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchStore()
+    }, [user])
 
     const onChangeHandler = (e) => {
-        setProductInfo({ ...productInfo, [e.target.name]: e.target.value })
+        const value = e.target.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value
+        setProductInfo({ ...productInfo, [e.target.name]: value })
     }
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        // Logic to add a product
         
+        if (!user) {
+            toast.error("Please sign in to add products")
+            return
+        }
+
+        if (!storeId) {
+            toast.error("Store not found. Please create a store first.")
+            return
+        }
+
+        // Validate required fields
+        if (!productInfo.name.trim()) {
+            toast.error("Please enter a product name")
+            return
+        }
+        if (!productInfo.description.trim()) {
+            toast.error("Please enter a product description")
+            return
+        }
+        if (!productInfo.category) {
+            toast.error("Please select a category")
+            return
+        }
+        if (productInfo.mrp <= 0 || productInfo.price <= 0) {
+            toast.error("Please enter valid prices")
+            return
+        }
+        if (productInfo.price > productInfo.mrp) {
+            toast.error("Offer price cannot be greater than MRP")
+            return
+        }
+
+        // Check if at least one image is uploaded
+        const imageFiles = Object.values(images).filter(img => img !== null)
+        if (imageFiles.length === 0) {
+            toast.error("Please upload at least one product image")
+            return
+        }
+
+        setLoading(true)
+
+        try {
+            // Convert images to base64
+            const imagePromises = imageFiles.map(file => convertImageToBase64(file))
+            const base64Images = await Promise.all(imagePromises)
+
+            const res = await fetch("/api/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: productInfo.name.trim(),
+                    description: productInfo.description.trim(),
+                    mrp: parseFloat(productInfo.mrp),
+                    price: parseFloat(productInfo.price),
+                    images: base64Images,
+                    category: productInfo.category,
+                    storeId: storeId,
+                    inStock: true,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to create product")
+            }
+
+            toast.success("Product added successfully!")
+            
+            // Reset form
+            setProductInfo({
+                name: "",
+                description: "",
+                mrp: 0,
+                price: 0,
+                category: "",
+            })
+            setImages({ 1: null, 2: null, 3: null, 4: null })
+            
+            // Redirect to manage products page
+            router.push("/store/manage-product")
+        } catch (err) {
+            console.error("Product creation error:", err)
+            toast.error(err.message || "Failed to add product")
+        } finally {
+            setLoading(false)
+        }
     }
 
 

@@ -3,25 +3,57 @@ import ProductDescription from "@/components/ProductDescription";
 import ProductDetails from "@/components/ProductDetails";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 export default function Product() {
 
     const { productId } = useParams();
-    const [product, setProduct] = useState();
-    const products = useSelector(state => state.product.list);
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const fetchProduct = async () => {
-        const product = products.find((product) => product.id === productId);
-        setProduct(product);
-    }
+        if (!productId) {
+            setLoading(false);
+            return;
+        }
+        
+        try {
+            const res = await fetch(`/api/products/${productId}`);
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || "Failed to load product");
+            }
+            const data = await res.json();
+            setProduct(data);
+        } catch (err) {
+            console.error("Error fetching product:", err);
+            // Product state remains null, which will show "Product not found" message
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        if (products.length > 0) {
-            fetchProduct()
+        if (productId) {
+            fetchProduct();
+            scrollTo(0, 0);
         }
-        scrollTo(0, 0)
-    }, [productId,products]);
+    }, [productId]);
+
+    if (loading) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center text-slate-400">
+                Loading product...
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center text-slate-400">
+                Product not found
+            </div>
+        );
+    }
 
     return (
         <div className="mx-6">
@@ -29,14 +61,14 @@ export default function Product() {
 
                 {/* Breadcrums */}
                 <div className="  text-gray-600 text-sm mt-8 mb-5">
-                    Home / Products / {product?.category}
+                    Home / Products / {product.category}
                 </div>
 
                 {/* Product Details */}
-                {product && (<ProductDetails product={product} />)}
+                <ProductDetails product={product} />
 
                 {/* Description & Reviews */}
-                {product && (<ProductDescription product={product} />)}
+                <ProductDescription product={product} />
             </div>
         </div>
     );

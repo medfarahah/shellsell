@@ -36,8 +36,27 @@ export default function StoreOrders() {
     };
 
     const updateOrderStatus = async (orderId, status) => {
-        // Implement via a dedicated API route or extend /api/orders
-        console.warn("Update order status not implemented", { orderId, status });
+        try {
+            const res = await fetch(`/api/orders/${orderId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status }),
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || "Failed to update order");
+            }
+
+            const updatedOrder = await res.json();
+            setOrders(orders.map(o => o.id === orderId ? updatedOrder : o));
+            if (selectedOrder?.id === orderId) {
+                setSelectedOrder(updatedOrder);
+            }
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     const openModal = (order) => {

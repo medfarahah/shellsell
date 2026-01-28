@@ -59,8 +59,22 @@ export default function AdminCoupons() {
     };
 
     const deleteCoupon = async (code) => {
-        // Implement delete via a dedicated API route if needed
-        console.warn("Delete coupon not implemented yet for code:", code);
+        try {
+            const res = await fetch(`/api/coupons/${code}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                const error = await res.json();
+                throw new Error(error.error || "Failed to delete coupon");
+            }
+
+            // Remove coupon from list
+            setCoupons(coupons.filter(c => c.code !== code));
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
     };
 
     useEffect(() => {

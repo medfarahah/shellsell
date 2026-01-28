@@ -69,9 +69,11 @@ export default function Cart() {
                                 cartArray.map((item, index) => (
                                     <tr key={index} className="space-x-2">
                                         <td className="flex gap-3 my-4">
-                                            <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
-                                                <Image src={item.images[0]} className="h-14 w-auto" alt="" width={45} height={45} />
-                                            </div>
+                                            {item.images && item.images.length > 0 && (
+                                                <div className="flex gap-3 items-center justify-center bg-slate-100 size-18 rounded-md">
+                                                    <Image src={item.images[0]} className="h-14 w-auto" alt={item.name} width={45} height={45} />
+                                                </div>
+                                            )}
                                             <div>
                                                 <p className="max-sm:text-sm">{item.name}</p>
                                                 <p className="text-xs text-slate-500">{item.category}</p>

@@ -4,8 +4,12 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
 import Loading from "@/components/Loading"
+import { useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 export default function CreateStore() {
+    const { user, isLoaded } = useUser()
+    const router = useRouter()
 
     const [alreadySubmitted, setAlreadySubmitted] = useState(false)
     const [status, setStatus] = useState("")
@@ -26,23 +30,143 @@ export default function CreateStore() {
         setStoreInfo({ ...storeInfo, [e.target.name]: e.target.value })
     }
 
+    const convertImageToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onload = () => resolve(reader.result)
+            reader.onerror = (error) => reject(error)
+        })
+    }
+
     const fetchSellerStatus = async () => {
-        // Logic to check if the store is already submitted
+        if (!isLoaded || !user) {
+            setLoading(false)
+            return
+        }
 
-
-        setLoading(false)
+        try {
+            const res = await fetch(`/api/stores?userId=${user.id}`)
+            if (!res.ok) throw new Error("Failed to check store status")
+            const stores = await res.json()
+            
+            if (stores.length > 0) {
+                const store = stores[0]
+                setAlreadySubmitted(true)
+                setStatus(store.status)
+                setMessage(
+                    store.status === "approved"
+                        ? "Your store has been approved! You can now manage your products."
+                        : store.status === "rejected"
+                        ? "Your store application was rejected. Please contact support for more information."
+                        : "Your store application is pending approval. We'll notify you once it's reviewed."
+                )
+                if (store.status === "approved") {
+                    setTimeout(() => {
+                        router.push("/store")
+                    }, 5000)
+                }
+            }
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        // Logic to submit the store details
+        
+        if (!user) {
+            toast.error("Please sign in to create a store")
+            return
+        }
 
+        if (!storeInfo.image) {
+            toast.error("Please upload a store logo")
+            return
+        }
 
+        // Validate form fields
+        if (!storeInfo.name.trim()) {
+            toast.error("Please enter a store name")
+            return
+        }
+        if (!storeInfo.username.trim()) {
+            toast.error("Please enter a username")
+            return
+        }
+        if (!storeInfo.description.trim()) {
+            toast.error("Please enter a description")
+            return
+        }
+        if (!storeInfo.email.trim()) {
+            toast.error("Please enter an email")
+            return
+        }
+        if (!storeInfo.contact.trim()) {
+            toast.error("Please enter a contact number")
+            return
+        }
+        if (!storeInfo.address.trim()) {
+            toast.error("Please enter an address")
+            return
+        }
+
+        try {
+            // Convert image to base64
+            const logoBase64 = await convertImageToBase64(storeInfo.image)
+
+            const res = await fetch("/api/stores", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    name: storeInfo.name.trim(),
+                    username: storeInfo.username.trim(),
+                    description: storeInfo.description.trim(),
+                    email: storeInfo.email.trim(),
+                    contact: storeInfo.contact.trim(),
+                    address: storeInfo.address.trim(),
+                    logo: logoBase64,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to create store")
+            }
+
+            toast.success("Store created successfully! Waiting for admin approval.")
+            setAlreadySubmitted(true)
+            setStatus("pending")
+            setMessage("Your store application has been submitted. We'll review it and notify you once it's approved.")
+        } catch (err) {
+            console.error("Store creation error:", err)
+            toast.error(err.message || "Failed to create store")
+        }
     }
 
     useEffect(() => {
-        fetchSellerStatus()
-    }, [])
+        if (isLoaded) {
+            fetchSellerStatus()
+        }
+    }, [isLoaded, user])
+
+    if (!isLoaded) {
+        return <Loading />
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-[80vh] flex flex-col items-center justify-center">
+                <p className="text-2xl font-semibold text-slate-500">Please sign in to create a store</p>
+            </div>
+        )
+    }
 
     return !loading ? (
         <>
