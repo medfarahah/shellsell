@@ -81,7 +81,7 @@ const ProductCard = ({ product }) => {
     return (
         <Link 
             href={`/product/${product.id}`} 
-            className='group max-xl:mx-auto relative'
+            className='group relative w-full'
             onClick={handleProductClick}
         >
             <button
@@ -95,16 +95,16 @@ const ProductCard = ({ product }) => {
                 />
             </button>
 
-            <div className='bg-[#F5F5F5] h-40 sm:w-60 sm:h-68 rounded-lg flex items-center justify-center'>
+            <div className='bg-[#F5F5F5] w-full h-40 sm:h-48 lg:h-68 rounded-lg flex items-center justify-center'>
                 <Image
                     width={500}
                     height={500}
-                    className='max-h-30 sm:max-h-40 w-auto group-hover:scale-115 transition duration-300'
+                    className='max-h-30 sm:max-h-40 lg:max-h-40 w-auto group-hover:scale-115 transition duration-300'
                     src={product.images[0]}
                     alt={product.name || ''}
                 />
             </div>
-            <div className='flex justify-between gap-3 text-sm text-slate-800 pt-2 max-w-60'>
+            <div className='flex justify-between gap-3 text-sm text-slate-800 pt-2 w-full'>
                 <div className="flex-1">
                     <p className="font-medium">{product.name}</p>
                     <div className='flex items-center gap-1 mt-1'>

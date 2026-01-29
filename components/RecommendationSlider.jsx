@@ -123,7 +123,7 @@ export default function RecommendationSlider({
     <div className={`px-6 my-20 max-w-6xl mx-auto ${className}`}>
       <Title title={title} description={`Showing ${products.length} recommended products`} />
 
-      <div className='mt-12 grid grid-cols-2 sm:flex flex-wrap gap-6 justify-between'>
+      <div className='mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 xl:gap-12'>
         {products.map((product, index) => (
           <ProductCard key={product.id || index} product={product} />
         ))}
