@@ -19,9 +19,15 @@ const ProductDetails = ({ product }) => {
     const router = useRouter()
 
     const [mainImage, setMainImage] = useState(product.images[0]);
+    const [selectedColor, setSelectedColor] = useState(product.color || '');
+    const [selectedSize, setSelectedSize] = useState('');
 
     const addToCartHandler = () => {
-        dispatch(addToCart({ productId }))
+        dispatch(addToCart({ 
+            productId, 
+            color: selectedColor || null, 
+            size: selectedSize || null 
+        }))
     }
 
     const ratings = product.rating || [];
@@ -56,28 +62,36 @@ const ProductDetails = ({ product }) => {
                     <p className="text-xl text-slate-500 line-through">{currency}{product.mrp}</p>
                 </div>
 
-                {/* Color & Size */}
+                {/* Color & Size Selection */}
                 {(product.color || (product.sizes && product.sizes.length > 0)) && (
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-4">
+                    <div className="flex flex-col gap-4 text-sm text-slate-600 mb-4">
                         {product.color && (
-                            <div className="flex items-center gap-1">
-                                <span className="font-medium">Color:</span>
-                                <span>{product.color}</span>
+                            <div className="flex flex-col gap-2">
+                                <span className="font-medium text-slate-800">Color:</span>
+                                <input
+                                    type="text"
+                                    value={selectedColor}
+                                    onChange={(e) => setSelectedColor(e.target.value)}
+                                    placeholder="Enter color"
+                                    className="w-full max-w-xs p-2 px-4 outline-none border border-slate-200 rounded"
+                                />
                             </div>
                         )}
                         {product.sizes && product.sizes.length > 0 && (
-                            <div className="flex items-center gap-1">
-                                <span className="font-medium">Sizes:</span>
-                                <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-col gap-2">
+                                <span className="font-medium text-slate-800">Size:</span>
+                                <select
+                                    value={selectedSize}
+                                    onChange={(e) => setSelectedSize(e.target.value)}
+                                    className="w-full max-w-xs p-2 px-4 outline-none border border-slate-200 rounded"
+                                >
+                                    <option value="">Select a size</option>
                                     {product.sizes.map((s, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="px-2 py-0.5 border border-slate-200 rounded text-xs"
-                                        >
+                                        <option key={idx} value={s}>
                                             {s}
-                                        </span>
+                                        </option>
                                     ))}
-                                </div>
+                                </select>
                             </div>
                         )}
                     </div>
@@ -91,14 +105,50 @@ const ProductDetails = ({ product }) => {
                         cart[productId] && (
                             <div className="flex flex-col gap-3">
                                 <p className="text-lg text-slate-800 font-semibold">Quantity</p>
-                                <Counter productId={productId} />
+                                <Counter productId={productId} color={selectedColor} size={selectedSize} />
                             </div>
                         )
                     }
-                    <button onClick={() => !cart[productId] ? addToCartHandler() : router.push('/cart')} className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition">
-                        {!cart[productId] ? 'Add to Cart' : 'View Cart'}
+                    <button onClick={() => {
+                        const cartItem = cart[productId];
+                        const isInCart = cartItem && (typeof cartItem === 'number' ? cartItem > 0 : cartItem.quantity > 0);
+                        if (!isInCart) {
+                            addToCartHandler();
+                        } else {
+                            router.push('/cart');
+                        }
+                    }} className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition">
+                        {(() => {
+                            const cartItem = cart[productId];
+                            const isInCart = cartItem && (typeof cartItem === 'number' ? cartItem > 0 : cartItem.quantity > 0);
+                            return !isInCart ? 'Add to Cart' : 'View Cart';
+                        })()}
                     </button>
                 </div>
+                {/* Display selected color and size if item is in cart */}
+                {(() => {
+                    const cartItem = cart[productId];
+                    if (!cartItem) return null;
+                    const color = typeof cartItem === 'object' ? cartItem.color : null;
+                    const size = typeof cartItem === 'object' ? cartItem.size : null;
+                    if (!color && !size) return null;
+                    return (
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mt-2">
+                            {color && (
+                                <div className="flex items-center gap-1">
+                                    <span className="font-medium">Selected Color:</span>
+                                    <span>{color}</span>
+                                </div>
+                            )}
+                            {size && (
+                                <div className="flex items-center gap-1">
+                                    <span className="font-medium">Selected Size:</span>
+                                    <span>{size}</span>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
                 <hr className="border-gray-300 my-5" />
                 <div className="flex flex-col gap-4 text-slate-500">
                     <p className="flex gap-3"> <EarthIcon className="text-slate-400" /> Free shipping worldwide </p>

@@ -32,6 +32,8 @@ const OrderItem = ({ order }) => {
                                 <div className="flex flex-col justify-center text-sm">
                                     <p className="font-medium text-slate-600 text-base">{item.product.name}</p>
                                     <p>{currency}{item.price} Qty : {item.quantity} </p>
+                                    {item.selectedColor && <p className="text-gray-500">Color: {item.selectedColor}</p>}
+                                    {item.selectedSize && <p className="text-gray-500">Size: {item.selectedSize}</p>}
                                     <p className="mb-1">{new Date(order.createdAt).toDateString()}</p>
                                     <div>
                                         {ratings.find(rating => order.id === rating.orderId && item.product.id === rating.productId)
@@ -48,8 +50,17 @@ const OrderItem = ({ order }) => {
                 <td className="text-center max-md:hidden">{currency}{order.total}</td>
 
                 <td className="text-left max-md:hidden">
-                    <p>{order.address.name}, {order.address.street},</p>
-                    <p>{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country},</p>
+                    <p>{order.address.name}</p>
+                    <p>
+                        {[
+                            order.address.street,
+                            order.address.quartier,
+                            order.address.city,
+                            order.address.state,
+                            order.address.zip,
+                            order.address.country,
+                        ].filter(Boolean).join(", ")}
+                    </p>
                     <p>{order.address.phone}</p>
                 </td>
 
@@ -70,8 +81,17 @@ const OrderItem = ({ order }) => {
             {/* Mobile */}
             <tr className="md:hidden">
                 <td colSpan={5}>
-                    <p>{order.address.name}, {order.address.street}</p>
-                    <p>{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country}</p>
+                    <p>{order.address.name}</p>
+                    <p>
+                        {[
+                            order.address.street,
+                            order.address.quartier,
+                            order.address.city,
+                            order.address.state,
+                            order.address.zip,
+                            order.address.country,
+                        ].filter(Boolean).join(", ")}
+                    </p>
                     <p>{order.address.phone}</p>
                     <br />
                     <div className="flex items-center">

@@ -207,7 +207,14 @@ export default function StoreOrders() {
                                 <span className="text-green-700">
                                     Address:
                                 </span>{" "}
-                                {`${selectedOrder.address?.street}, ${selectedOrder.address?.city}, ${selectedOrder.address?.state}, ${selectedOrder.address?.zip}, ${selectedOrder.address?.country}`}
+                                {[
+                                    selectedOrder.address?.quartier,
+                                    selectedOrder.address?.street,
+                                    selectedOrder.address?.city,
+                                    selectedOrder.address?.state,
+                                    selectedOrder.address?.zip,
+                                    selectedOrder.address?.country
+                                ].filter(Boolean).join(", ")}
                             </p>
                         </div>
 
@@ -234,6 +241,8 @@ export default function StoreOrders() {
                                             </p>
                                             <p>Qty: {item.quantity}</p>
                                             <p>Price: ${item.price}</p>
+                                            {item.selectedColor && <p>Color: {item.selectedColor}</p>}
+                                            {item.selectedSize && <p>Size: {item.selectedSize}</p>}
                                         </div>
                                     </div>
                                 ))}

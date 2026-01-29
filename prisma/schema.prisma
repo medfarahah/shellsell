@@ -84,10 +84,12 @@ model Order {
 
 // Required for creating an OrderItem: orderId, productId, quantity, price
 model OrderItem {
-    orderId   String
-    productId String
-    quantity  Int
-    price     Float
+    orderId       String
+    productId     String
+    quantity      Int
+    price         Float
+    selectedColor String?
+    selectedSize  String?
 
     // Relations
     order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)

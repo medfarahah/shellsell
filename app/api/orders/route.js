@@ -72,20 +72,30 @@ export async function POST(request) {
 
     const order = await prisma.order.create({
       data: {
-        total,
+        total: Number(total), // Coerce to Float
         userId,
         storeId,
         addressId,
-        isPaid,
+        isPaid: Boolean(isPaid), // Coerce to Boolean
         paymentMethod,
-        isCouponUsed,
-        coupon,
+        isCouponUsed: Boolean(isCouponUsed), // Coerce to Boolean
+        coupon: coupon || {},
         orderItems: {
-          create: orderItems.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
+          create: orderItems.map((item) => {
+            const orderItemData = {
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+            };
+            // Only include selectedColor/selectedSize if they have values
+            if (item.selectedColor && item.selectedColor.trim()) {
+              orderItemData.selectedColor = item.selectedColor.trim();
+            }
+            if (item.selectedSize && item.selectedSize.trim()) {
+              orderItemData.selectedSize = item.selectedSize.trim();
+            }
+            return orderItemData;
+          }),
         },
       },
       include: {
@@ -95,9 +105,14 @@ export async function POST(request) {
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
-    console.error('POST /api/orders error', error);
+    console.error('POST /api/orders error:', error);
+    // Ensure we handle non-Error objects thrown
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      {
+        error: errorMessage || 'Failed to create order',
+        details: process.env.NODE_ENV === 'development' ? error : undefined,
+      },
       { status: 500 },
     );
   }

@@ -2,7 +2,7 @@
 import Counter from "@/components/Counter";
 import OrderSummary from "@/components/OrderSummary";
 import PageTitle from "@/components/PageTitle";
-import { deleteItemFromCart } from "@/lib/features/cart/cartSlice";
+import { deleteItemFromCart, updateCartItem } from "@/lib/features/cart/cartSlice";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -26,14 +26,29 @@ export default function Cart() {
         for (const [key, value] of Object.entries(cartItems)) {
             const product = products.find(product => product.id === key);
             if (product) {
+                // Handle both old format (number) and new format (object)
+                const quantity = typeof value === 'number' ? value : (value?.quantity || 0);
+                const color = typeof value === 'object' ? value.color : null;
+                const size = typeof value === 'object' ? value.size : null;
+                
                 cartArray.push({
                     ...product,
-                    quantity: value,
+                    quantity,
+                    selectedColor: color,
+                    selectedSize: size,
                 });
-                setTotalPrice(prev => prev + product.price * value);
+                setTotalPrice(prev => prev + product.price * quantity);
             }
         }
         setCartArray(cartArray);
+    }
+
+    const handleColorChange = (productId, newColor) => {
+        dispatch(updateCartItem({ productId, color: newColor || null }));
+    }
+
+    const handleSizeChange = (productId, newSize) => {
+        dispatch(updateCartItem({ productId, size: newSize || null }));
     }
 
     const handleDeleteItemFromCart = (productId) => {
@@ -74,14 +89,47 @@ export default function Cart() {
                                                     <Image src={item.images[0]} className="h-14 w-auto" alt={item.name} width={45} height={45} />
                                                 </div>
                                             )}
-                                            <div>
+                                            <div className="flex-1">
                                                 <p className="max-sm:text-sm">{item.name}</p>
                                                 <p className="text-xs text-slate-500">{item.category}</p>
                                                 <p>{currency}{item.price}</p>
+                                                
+                                                {/* Color Selection */}
+                                                {item.color && (
+                                                    <div className="mt-2">
+                                                        <label className="text-xs text-slate-600 font-medium">Color:</label>
+                                                        <input
+                                                            type="text"
+                                                            value={item.selectedColor || ''}
+                                                            onChange={(e) => handleColorChange(item.id, e.target.value)}
+                                                            placeholder="Enter color"
+                                                            className="w-full max-w-[120px] mt-1 p-1.5 px-2 text-xs outline-none border border-slate-200 rounded"
+                                                        />
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Size Selection */}
+                                                {item.sizes && item.sizes.length > 0 && (
+                                                    <div className="mt-2">
+                                                        <label className="text-xs text-slate-600 font-medium">Size:</label>
+                                                        <select
+                                                            value={item.selectedSize || ''}
+                                                            onChange={(e) => handleSizeChange(item.id, e.target.value)}
+                                                            className="w-full max-w-[120px] mt-1 p-1.5 px-2 text-xs outline-none border border-slate-200 rounded"
+                                                        >
+                                                            <option value="">Select size</option>
+                                                            {item.sizes.map((s, idx) => (
+                                                                <option key={idx} value={s}>
+                                                                    {s}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="text-center">
-                                            <Counter productId={item.id} />
+                                            <Counter productId={item.id} color={item.selectedColor} size={item.selectedSize} />
                                         </td>
                                         <td className="text-center">{currency}{(item.price * item.quantity).toLocaleString()}</td>
                                         <td className="text-center max-md:hidden">

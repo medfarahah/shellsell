@@ -1,8 +1,10 @@
 'use client'
 
 import Link from "next/link"
+import Image from "next/image"
 
-const StoreNavbar = () => {
+const StoreNavbar = ({ storeInfo }) => {
+
     return (
         <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">
             <Link href="/" className="relative text-4xl font-semibold text-slate-700">
@@ -12,7 +14,16 @@ const StoreNavbar = () => {
                 </p>
             </Link>
             <div className="flex items-center gap-3">
-                <p>Hi, Seller</p>
+                {storeInfo?.logo && (
+                    <Image
+                        src={storeInfo.logo}
+                        alt={storeInfo.name || 'Store Logo'}
+                        className="size-10 sm:size-12 object-cover border border-slate-200 rounded-full"
+                        width={48}
+                        height={48}
+                    />
+                )}
+                <p>Hi, {storeInfo?.name || 'Seller'}</p>
             </div>
         </div>
     )

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { HomeIcon, LayoutListIcon, SquarePenIcon, SquarePlusIcon } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 const StoreSidebar = ({storeInfo}) => {
 
@@ -18,15 +19,23 @@ const StoreSidebar = ({storeInfo}) => {
     return (
         <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 sm:min-w-60">
             <div className="flex flex-col gap-2 justify-center items-center pt-8 max-sm:hidden">
-                <Link href="/" className="relative text-3xl font-semibold text-slate-700">
-                    <span className="text-green-600">As</span>sal<span className="text-green-600 text-4xl leading-0">.</span>
-                    <p className="absolute text-[10px] font-semibold -top-1 -right-7 px-2 p-0.5 rounded-full flex items-center gap-1 text-white bg-green-500">
-                        plus
-                    </p>
-                </Link>
-                <p className="text-slate-600 text-sm">
-                    {storeInfo?.name ? `Seller: ${storeInfo.name}` : 'Assal Seller Dashboard'}
+                {storeInfo?.logo && (
+                    <div className="mb-2">
+                        <Image
+                            src={storeInfo.logo}
+                            alt={storeInfo.name || 'Store Logo'}
+                            className="size-20 sm:size-24 object-cover border-2 border-slate-200 rounded-full shadow-sm"
+                            width={96}
+                            height={96}
+                        />
+                    </div>
+                )}
+                <p className="text-slate-600 text-sm text-center px-2">
+                    {storeInfo?.name ? storeInfo.name : 'Assal Seller Dashboard'}
                 </p>
+                {storeInfo?.username && (
+                    <p className="text-xs text-slate-400">@{storeInfo.username}</p>
+                )}
             </div>
 
             <div className="max-sm:mt-6">

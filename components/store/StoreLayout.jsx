@@ -49,7 +49,7 @@ const StoreLayout = ({ children }) => {
         <Loading />
     ) : isSeller ? (
         <div className="flex flex-col h-screen">
-            <SellerNavbar />
+            <SellerNavbar storeInfo={storeInfo} />
             <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
                 <SellerSidebar storeInfo={storeInfo} />
                 <div className="flex-1 h-full p-5 lg:pl-12 lg:pt-12 overflow-y-scroll">

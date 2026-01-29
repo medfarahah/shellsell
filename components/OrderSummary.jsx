@@ -118,6 +118,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                 productId: item.id,
                 quantity: item.quantity,
                 price: item.price,
+                selectedColor: item.selectedColor || null,
+                selectedSize: item.selectedSize || null,
             });
         }
 
@@ -150,8 +152,10 @@ const OrderSummary = ({ totalPrice, items }) => {
                 });
 
                 if (!res.ok) {
-                    const error = await res.json();
-                    throw new Error(error.error || "Failed to create order");
+                    const errorData = await res.json();
+                    const errorMessage = errorData.error || errorData.message || "Failed to create order";
+                    console.error("Order creation failed:", errorData);
+                    throw new Error(errorMessage);
                 }
 
                 return res.json();
