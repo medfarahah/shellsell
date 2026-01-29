@@ -1,8 +1,10 @@
 'use client'
 import ProductDescription from "@/components/ProductDescription";
 import ProductDetails from "@/components/ProductDetails";
+import RecommendationSlider from "@/components/RecommendationSlider";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { trackProductView } from "@/lib/tracking/behaviorTracker";
 
 export default function Product() {
 
@@ -39,6 +41,13 @@ export default function Product() {
         }
     }, [productId]);
 
+    // Track product view when product is loaded
+    useEffect(() => {
+        if (product) {
+            trackProductView(product);
+        }
+    }, [product]);
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center text-slate-400">
@@ -69,6 +78,13 @@ export default function Product() {
 
                 {/* Description & Reviews */}
                 <ProductDescription product={product} />
+
+                {/* Related Products Recommendations */}
+                <RecommendationSlider 
+                    title="You May Also Like"
+                    limit={8}
+                    className="mt-12"
+                />
             </div>
         </div>
     );

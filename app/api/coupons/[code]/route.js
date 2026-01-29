@@ -6,7 +6,9 @@ export const runtime = 'nodejs';
 // DELETE /api/coupons/[code] - delete a coupon
 export async function DELETE(request, { params }) {
   try {
-    const { code } = params;
+    // Handle async params in Next.js 15+
+    const resolvedParams = await params;
+    const { code } = resolvedParams;
 
     await prisma.coupon.delete({
       where: { code },

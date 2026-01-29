@@ -52,13 +52,27 @@ const OrderSummary = ({ totalPrice, items }) => {
             return;
         }
 
-        try {
-            const res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&onlyPublic=true`);
-            if (!res.ok) {
-                throw new Error("Coupon not found");
-            }
+        if (!user) {
+            toast.error("Please sign in to use coupons");
+            return;
+        }
 
-            const coupons = await res.json();
+        try {
+            // First, check if user is a new user (has no previous orders)
+            const ordersRes = await fetch(`/api/orders?userId=${user.id}`);
+            const previousOrders = ordersRes.ok ? await ordersRes.json() : [];
+            const isNewUser = previousOrders.length === 0;
+
+            // Try to fetch coupon - first try public, then try new user coupons
+            let res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&onlyPublic=true`);
+            let coupons = res.ok ? await res.json() : [];
+            
+            // If not found in public, try new user coupons
+            if (coupons.length === 0) {
+                res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&forNewUser=true`);
+                coupons = res.ok ? await res.json() : [];
+            }
+            
             if (coupons.length === 0) {
                 toast.error("Invalid or expired coupon code");
                 return;
@@ -69,6 +83,12 @@ const OrderSummary = ({ totalPrice, items }) => {
             // Check if coupon is expired
             if (new Date(foundCoupon.expiresAt) < new Date()) {
                 toast.error("This coupon has expired");
+                return;
+            }
+
+            // Check if coupon is for new users only
+            if (foundCoupon.forNewUser && !isNewUser) {
+                toast.error("This coupon is only available for new users");
                 return;
             }
 

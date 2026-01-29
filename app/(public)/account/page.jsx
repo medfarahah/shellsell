@@ -1,19 +1,27 @@
 'use client';
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { Package, User, MapPin, ShoppingBag, Heart } from "lucide-react";
+import { Package, User, MapPin, ShoppingBag, Heart, Tag, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import Loading from "@/components/Loading";
 import OrderItem from "@/components/OrderItem";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import AddressModal from "@/components/AddressModal";
+import { useDispatch } from "react-redux";
+import { setAddresses } from "@/lib/features/address/addressSlice";
 
 export default function AccountPage() {
     const { user, isLoaded } = useUser();
+    const dispatch = useDispatch();
     const [orders, setOrders] = useState([]);
     const [addresses, setAddresses] = useState([]);
     const [wishlist, setWishlist] = useState([]);
+    const [coupons, setCoupons] = useState([]);
+    const [discountedProducts, setDiscountedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'addresses', 'wishlist', 'profile'
+    const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'addresses', 'wishlist', 'coupons', 'profile'
+    const [showAddressModal, setShowAddressModal] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,10 +31,12 @@ export default function AccountPage() {
             }
 
             try {
-                const [ordersRes, addressesRes, wishlistRes] = await Promise.all([
+                const [ordersRes, addressesRes, wishlistRes, couponsRes, productsRes] = await Promise.all([
                     fetch(`/api/orders?userId=${user.id}`),
                     fetch(`/api/addresses?userId=${user.id}`),
                     fetch(`/api/wishlist?userId=${user.id}`),
+                    fetch(`/api/coupons?onlyPublic=true`),
+                    fetch(`/api/products`),
                 ]);
 
                 if (ordersRes.ok) {
@@ -42,6 +52,24 @@ export default function AccountPage() {
                 if (wishlistRes.ok) {
                     const wishlistData = await wishlistRes.json();
                     setWishlist(Array.isArray(wishlistData) ? wishlistData : []);
+                }
+
+                if (couponsRes.ok) {
+                    const couponsData = await couponsRes.json();
+                    setCoupons(Array.isArray(couponsData) ? couponsData : []);
+                }
+
+                if (productsRes.ok) {
+                    const productsData = await productsRes.json();
+                    // Filter products with discounts (price < mrp) and calculate discount percentage
+                    const discounted = productsData
+                        .filter(product => product.mrp > product.price)
+                        .map(product => ({
+                            ...product,
+                            discountPercent: Math.round(((product.mrp - product.price) / product.mrp) * 100)
+                        }))
+                        .sort((a, b) => b.discountPercent - a.discountPercent); // Sort by highest discount
+                    setDiscountedProducts(discounted);
                 }
             } catch (err) {
                 console.error("Failed to fetch account data:", err);
@@ -153,6 +181,19 @@ export default function AccountPage() {
                         </div>
                     </button>
                     <button
+                        onClick={() => setActiveTab('coupons')}
+                        className={`px-4 py-2 font-medium transition-colors ${
+                            activeTab === 'coupons'
+                                ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Tag size={18} />
+                            Coupons ({coupons.length})
+                        </div>
+                    </button>
+                    <button
                         onClick={() => setActiveTab('profile')}
                         className={`px-4 py-2 font-medium transition-colors ${
                             activeTab === 'profile'
@@ -249,12 +290,13 @@ export default function AccountPage() {
                         <div>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-semibold text-slate-800">My Addresses</h2>
-                                <Link
-                                    href="/cart"
-                                    className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                                <button
+                                    onClick={() => setShowAddressModal(true)}
+                                    className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 text-sm font-medium transition-colors"
                                 >
-                                    Add Address →
-                                </Link>
+                                    <PlusIcon size={18} />
+                                    Add Address
+                                </button>
                             </div>
                             {addresses.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -291,12 +333,13 @@ export default function AccountPage() {
                                 <div className="text-center py-12">
                                     <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
                                     <p className="text-slate-500 mb-4">You have no saved addresses</p>
-                                    <Link
-                                        href="/cart"
-                                        className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                    <button
+                                        onClick={() => setShowAddressModal(true)}
+                                        className="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                                     >
+                                        <PlusIcon size={18} />
                                         Add Address
-                                    </Link>
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -351,6 +394,164 @@ export default function AccountPage() {
                         </div>
                     )}
 
+                    {activeTab === 'coupons' && (
+                        <div>
+                            {/* Available Coupons Section */}
+                            <div className="mb-8">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-semibold text-slate-800">Available Coupons</h2>
+                                    <Link
+                                        href="/cart"
+                                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                                    >
+                                        Use in Cart →
+                                    </Link>
+                                </div>
+                                {coupons.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {coupons.map((coupon) => {
+                                            const isExpired = new Date(coupon.expiresAt) < new Date();
+                                            const handleCopyCode = () => {
+                                                if (navigator?.clipboard?.writeText) {
+                                                    navigator.clipboard.writeText(coupon.code).catch(() => { });
+                                                    toast.success(`Coupon ${coupon.code.toUpperCase()} copied!`);
+                                                }
+                                            };
+                                            return (
+                                                <div
+                                                    key={coupon.code}
+                                                    className={`border rounded-lg p-5 transition-shadow ${
+                                                        isExpired
+                                                            ? 'border-slate-200 bg-slate-50 opacity-60'
+                                                            : 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-lg'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <Tag size={20} className="text-indigo-600" />
+                                                                <span className="text-2xl font-bold text-indigo-600">
+                                                                    {coupon.discount}%
+                                                                </span>
+                                                                <span className="text-slate-600">OFF</span>
+                                                            </div>
+                                                            <p className="text-lg font-semibold text-slate-800 mb-1">
+                                                                {coupon.code.toUpperCase()}
+                                                            </p>
+                                                            {coupon.description && (
+                                                                <p className="text-sm text-slate-600 mb-2">
+                                                                    {coupon.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2 mb-4">
+                                                        {coupon.forNewUser && (
+                                                            <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                                                                New Users Only
+                                                            </span>
+                                                        )}
+                                                        {coupon.forMember && (
+                                                            <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                                                                Members Only
+                                                            </span>
+                                                        )}
+                                                        <p className="text-xs text-slate-500">
+                                                            Expires: {new Date(coupon.expiresAt).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                    {isExpired ? (
+                                                        <button
+                                                            disabled
+                                                            className="w-full px-4 py-2 bg-slate-300 text-slate-500 rounded-lg cursor-not-allowed text-sm font-medium"
+                                                        >
+                                                            Expired
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={handleCopyCode}
+                                                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+                                                        >
+                                                            Copy Code
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 border border-slate-200 rounded-lg">
+                                        <Tag size={48} className="mx-auto text-slate-300 mb-4" />
+                                        <p className="text-slate-500">No coupons available at the moment</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Discounted Products Section */}
+                            <div>
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-semibold text-slate-800">Discounted Products</h2>
+                                    <Link
+                                        href="/shop"
+                                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+                                    >
+                                        View All →
+                                    </Link>
+                                </div>
+                                {discountedProducts.length > 0 ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                        {discountedProducts.map((product) => {
+                                            const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
+                                            return (
+                                                <Link
+                                                    key={product.id}
+                                                    href={`/product/${product.id}`}
+                                                    className="border border-slate-200 rounded-lg p-4 hover:shadow-lg transition-shadow flex flex-col group"
+                                                >
+                                                    <div className="relative mb-3">
+                                                        {product.images && product.images.length > 0 && (
+                                                            <div className="bg-slate-100 rounded-lg flex items-center justify-center h-40 overflow-hidden">
+                                                                <Image
+                                                                    src={product.images[0]}
+                                                                    alt={product.name || ''}
+                                                                    width={200}
+                                                                    height={200}
+                                                                    className="object-contain max-h-40 group-hover:scale-110 transition-transform"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                                                            {product.discountPercent}% OFF
+                                                        </div>
+                                                    </div>
+                                                    <p className="font-medium text-slate-800 mb-1 line-clamp-2 text-sm">
+                                                        {product.name}
+                                                    </p>
+                                                    <p className="text-slate-600 text-xs mb-2">
+                                                        {product.category}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-auto">
+                                                        <p className="text-slate-900 font-semibold">
+                                                            {currency}{product.price?.toFixed ? product.price.toFixed(2) : product.price}
+                                                        </p>
+                                                        <p className="text-slate-400 text-xs line-through">
+                                                            {currency}{product.mrp?.toFixed ? product.mrp.toFixed(2) : product.mrp}
+                                                        </p>
+                                                    </div>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 border border-slate-200 rounded-lg">
+                                        <ShoppingBag size={48} className="mx-auto text-slate-300 mb-4" />
+                                        <p className="text-slate-500">No discounted products available at the moment</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'profile' && (
                         <div>
                             <h2 className="text-xl font-semibold text-slate-800 mb-6">Profile Information</h2>
@@ -387,6 +588,28 @@ export default function AccountPage() {
                     )}
                 </div>
             </div>
+
+            {/* Address Modal */}
+            {showAddressModal && (
+                <AddressModal
+                    setShowAddressModal={setShowAddressModal}
+                    onAddressAdded={async () => {
+                        // Refresh addresses after adding new one
+                        if (user) {
+                            try {
+                                const res = await fetch(`/api/addresses?userId=${user.id}`);
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    setAddresses(data);
+                                    dispatch(setAddresses(data));
+                                }
+                            } catch (err) {
+                                console.error("Failed to refresh addresses:", err);
+                            }
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 }
