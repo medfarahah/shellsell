@@ -16,6 +16,7 @@ model User {
     email String
     image String
     cart  Json   @default("{}")
+  wishlist Json @default("[]")
 
     // Relations
     ratings     Rating[]
@@ -35,6 +36,9 @@ model Product {
     category    String
     inStock     Boolean  @default(true)
     storeId     String
+    color       String?
+    sizeType    String?
+    sizes       String[] @default([])
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
 

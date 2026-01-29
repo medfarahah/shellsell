@@ -64,11 +64,28 @@ export async function POST(request) {
       category,
       storeId,
       inStock = true,
+      color,
+      sizeType,
+      sizes,
     } = body;
 
-    if (!name || !description || !mrp || !price || !images || !category || !storeId) {
+    const mrpNum = Number(mrp);
+    const priceNum = Number(price);
+
+    if (
+      !name ||
+      !description ||
+      !Array.isArray(images) ||
+      images.length === 0 ||
+      !category ||
+      !storeId ||
+      !Number.isFinite(mrpNum) ||
+      mrpNum <= 0 ||
+      !Number.isFinite(priceNum) ||
+      priceNum <= 0
+    ) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing or invalid required fields' },
         { status: 400 },
       );
     }
@@ -77,12 +94,15 @@ export async function POST(request) {
       data: {
         name,
         description,
-        mrp,
-        price,
+        mrp: mrpNum,
+        price: priceNum,
         images,
         category,
         storeId,
-        inStock,
+        inStock: Boolean(inStock), // Ensure boolean
+        ...(color ? { color } : {}),
+        ...(sizeType ? { sizeType } : {}),
+        ...(Array.isArray(sizes) && sizes.length ? { sizes } : {}),
       },
     });
 
@@ -90,7 +110,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('POST /api/products error', error);
     return NextResponse.json(
-      { error: 'Failed to create product' },
+      { error: error.message || 'Failed to create product' },
       { status: 500 },
     );
   }

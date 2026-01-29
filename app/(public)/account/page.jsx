@@ -1,7 +1,7 @@
 'use client';
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { Package, User, MapPin, ShoppingBag } from "lucide-react";
+import { Package, User, MapPin, ShoppingBag, Heart } from "lucide-react";
 import Link from "next/link";
 import Loading from "@/components/Loading";
 import OrderItem from "@/components/OrderItem";
@@ -11,8 +11,9 @@ export default function AccountPage() {
     const { user, isLoaded } = useUser();
     const [orders, setOrders] = useState([]);
     const [addresses, setAddresses] = useState([]);
+    const [wishlist, setWishlist] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'addresses', 'profile'
+    const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'addresses', 'wishlist', 'profile'
 
     useEffect(() => {
         const fetchData = async () => {
@@ -22,9 +23,10 @@ export default function AccountPage() {
             }
 
             try {
-                const [ordersRes, addressesRes] = await Promise.all([
+                const [ordersRes, addressesRes, wishlistRes] = await Promise.all([
                     fetch(`/api/orders?userId=${user.id}`),
                     fetch(`/api/addresses?userId=${user.id}`),
+                    fetch(`/api/wishlist?userId=${user.id}`),
                 ]);
 
                 if (ordersRes.ok) {
@@ -35,6 +37,11 @@ export default function AccountPage() {
                 if (addressesRes.ok) {
                     const addressesData = await addressesRes.json();
                     setAddresses(addressesData);
+                }
+
+                if (wishlistRes.ok) {
+                    const wishlistData = await wishlistRes.json();
+                    setWishlist(Array.isArray(wishlistData) ? wishlistData : []);
                 }
             } catch (err) {
                 console.error("Failed to fetch account data:", err);
@@ -130,6 +137,19 @@ export default function AccountPage() {
                         <div className="flex items-center gap-2">
                             <MapPin size={18} />
                             Addresses ({addresses.length})
+                        </div>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('wishlist')}
+                        className={`px-4 py-2 font-medium transition-colors ${
+                            activeTab === 'wishlist'
+                                ? 'text-indigo-600 border-b-2 border-indigo-600'
+                                : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Heart size={18} />
+                            Wishlist ({wishlist.length})
                         </div>
                     </button>
                     <button
@@ -276,6 +296,55 @@ export default function AccountPage() {
                                         className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                                     >
                                         Add Address
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'wishlist' && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-slate-800 mb-6">My Wishlist</h2>
+                            {wishlist.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {wishlist.map((item) => (
+                                        <Link
+                                            key={item.id}
+                                            href={`/product/${item.id}`}
+                                            className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col"
+                                        >
+                                            {item.images && item.images.length > 0 && (
+                                                <div className="mb-3 flex justify-center">
+                                                    <Image
+                                                        src={item.images[0]}
+                                                        alt={item.name || ''}
+                                                        width={160}
+                                                        height={160}
+                                                        className="object-contain max-h-40"
+                                                    />
+                                                </div>
+                                            )}
+                                            <p className="font-medium text-slate-800 mb-1 line-clamp-2">
+                                                {item.name}
+                                            </p>
+                                            <p className="text-slate-600 text-sm mb-2">
+                                                {item.category}
+                                            </p>
+                                            <p className="text-slate-900 font-semibold">
+                                                ${item.price?.toFixed ? item.price.toFixed(2) : item.price}
+                                            </p>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <Heart size={48} className="mx-auto text-slate-300 mb-4" />
+                                    <p className="text-slate-500 mb-4">You have no items in your wishlist yet</p>
+                                    <Link
+                                        href="/shop"
+                                        className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                                    >
+                                        Browse Products
                                     </Link>
                                 </div>
                             )}

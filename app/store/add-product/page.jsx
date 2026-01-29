@@ -19,6 +19,9 @@ export default function StoreAddProduct() {
         mrp: 0,
         price: 0,
         category: "",
+        color: "",
+        sizeType: "",       // 'letter' or 'number'
+        sizesInput: "",     // raw input, e.g. "S,M,L" or "38,40,42"
     })
     const [loading, setLoading] = useState(false)
     const [generatingDescription, setGeneratingDescription] = useState(false)
@@ -92,6 +95,12 @@ export default function StoreAddProduct() {
             return
         }
 
+        // Basic validation for sizes if provided
+        if (productInfo.sizesInput.trim() && !productInfo.sizeType) {
+            toast.error("Please select a size type (letter or number)")
+            return
+        }
+
         // Check if at least one image is uploaded
         const imageFiles = Object.values(images).filter(img => img !== null)
         if (imageFiles.length === 0) {
@@ -105,6 +114,12 @@ export default function StoreAddProduct() {
             // Convert images to base64
             const imagePromises = imageFiles.map(file => convertImageToBase64(file))
             const base64Images = await Promise.all(imagePromises)
+
+            // Parse sizes input into an array
+            const sizesArray = productInfo.sizesInput
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean)
 
             const res = await fetch("/api/products", {
                 method: "POST",
@@ -120,6 +135,9 @@ export default function StoreAddProduct() {
                     category: productInfo.category,
                     storeId: storeId,
                     inStock: true,
+                    color: productInfo.color.trim() || undefined,
+                    sizeType: productInfo.sizeType || undefined,
+                    sizes: sizesArray.length ? sizesArray : undefined,
                 }),
             })
 
@@ -138,6 +156,9 @@ export default function StoreAddProduct() {
                 mrp: 0,
                 price: 0,
                 category: "",
+                color: "",
+                sizeType: "",
+                sizesInput: "",
             })
             setImages({ 1: null, 2: null, 3: null, 4: null })
             
@@ -255,12 +276,65 @@ export default function StoreAddProduct() {
                 </label>
             </div>
 
-            <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded" required>
+            <select
+                onChange={e => setProductInfo({ ...productInfo, category: e.target.value })}
+                value={productInfo.category}
+                className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded"
+                required
+            >
                 <option value="">Select a category</option>
                 {categories.map((category) => (
                     <option key={category} value={category}>{category}</option>
                 ))}
             </select>
+
+            {/* Color */}
+            <label htmlFor="" className="flex flex-col gap-2 my-4 max-w-sm">
+                Color (optional)
+                <input
+                    type="text"
+                    name="color"
+                    onChange={onChangeHandler}
+                    value={productInfo.color}
+                    placeholder="e.g. Black, Red"
+                    className="w-full p-2 px-4 outline-none border border-slate-200 rounded"
+                />
+            </label>
+
+            {/* Sizes */}
+            <div className="flex flex-col gap-2 my-4 max-w-sm">
+                <span className="text-sm font-medium text-slate-700">Sizes (optional)</span>
+                <div className="flex items-center gap-4 mb-2">
+                    <label className="flex items-center gap-1 text-sm">
+                        <input
+                            type="radio"
+                            name="sizeType"
+                            value="letter"
+                            checked={productInfo.sizeType === 'letter'}
+                            onChange={onChangeHandler}
+                        />
+                        <span>Letter (e.g. S, M, L)</span>
+                    </label>
+                    <label className="flex items-center gap-1 text-sm">
+                        <input
+                            type="radio"
+                            name="sizeType"
+                            value="number"
+                            checked={productInfo.sizeType === 'number'}
+                            onChange={onChangeHandler}
+                        />
+                        <span>Number (e.g. 38, 40, 42)</span>
+                    </label>
+                </div>
+                <input
+                    type="text"
+                    name="sizesInput"
+                    onChange={onChangeHandler}
+                    value={productInfo.sizesInput}
+                    placeholder={productInfo.sizeType === 'number' ? "38, 40, 42" : "S, M, L"}
+                    className="w-full p-2 px-4 outline-none border border-slate-200 rounded"
+                />
+            </div>
 
             <br />
 

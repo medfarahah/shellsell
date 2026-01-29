@@ -55,6 +55,33 @@ const ProductDetails = ({ product }) => {
                     <p> {currency}{product.price} </p>
                     <p className="text-xl text-slate-500 line-through">{currency}{product.mrp}</p>
                 </div>
+
+                {/* Color & Size */}
+                {(product.color || (product.sizes && product.sizes.length > 0)) && (
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-4">
+                        {product.color && (
+                            <div className="flex items-center gap-1">
+                                <span className="font-medium">Color:</span>
+                                <span>{product.color}</span>
+                            </div>
+                        )}
+                        {product.sizes && product.sizes.length > 0 && (
+                            <div className="flex items-center gap-1">
+                                <span className="font-medium">Sizes:</span>
+                                <div className="flex flex-wrap gap-1">
+                                    {product.sizes.map((s, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="px-2 py-0.5 border border-slate-200 rounded text-xs"
+                                        >
+                                            {s}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <div className="flex items-center gap-2 text-slate-500">
                     <TagIcon size={14} />
                     <p>Save {((product.mrp - product.price) / product.mrp * 100).toFixed(0)}% right now</p>
