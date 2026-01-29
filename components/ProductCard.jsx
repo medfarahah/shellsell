@@ -81,7 +81,7 @@ const ProductCard = ({ product }) => {
     return (
         <Link 
             href={`/product/${product.id}`} 
-            className='group relative w-full'
+            className='group max-xl:mx-auto relative'
             onClick={handleProductClick}
         >
             <button
@@ -95,47 +95,30 @@ const ProductCard = ({ product }) => {
                 />
             </button>
 
-            <div className='bg-[#F5F5F5] w-full h-40 sm:h-48 lg:h-68 rounded-lg flex items-center justify-center'>
+            <div className='bg-[#F5F5F5] h-40 sm:w-60 sm:h-68 rounded-lg flex items-center justify-center'>
                 <Image
                     width={500}
                     height={500}
-                    className='max-h-30 sm:max-h-40 lg:max-h-40 w-auto group-hover:scale-115 transition duration-300'
+                    className='max-h-30 sm:max-h-40 w-auto group-hover:scale-115 transition duration-300'
                     src={product.images[0]}
                     alt={product.name || ''}
                 />
             </div>
-            <div className='flex justify-between gap-3 text-sm text-slate-800 pt-2 w-full'>
-                <div className="flex-1">
-                    <p className="font-medium">{product.name}</p>
-                    <div className='flex items-center gap-1 mt-1'>
+            <div className='flex justify-between gap-3 text-sm text-slate-800 pt-2 max-w-60'>
+                <div>
+                    <p>{product.name}</p>
+                    <div className='flex'>
                         {Array(5).fill('').map((_, index) => (
                             <StarIcon
                                 key={index}
-                                size={12}
-                                className='text-transparent'
+                                size={14}
+                                className='text-transparent mt-0.5'
                                 fill={rating >= index + 1 ? "#00C950" : "#D1D5DB"}
                             />
                         ))}
-                        <span className="text-xs text-slate-500 ml-1">({ratings.length})</span>
-                    </div>
-                    {/* Vendor Info */}
-                    <div className="mt-2 pt-2 border-t border-slate-100">
-                        <p className="text-xs text-slate-600 font-medium">{vendorName}</p>
-                        {vendorRating > 0 && (
-                            <div className="flex items-center gap-1 mt-0.5">
-                                <StarIcon size={10} className="text-yellow-500 fill-yellow-500" />
-                                <span className="text-xs text-slate-600">{vendorRating.toFixed(1)}</span>
-                                <span className="text-xs text-slate-400">Vendor</span>
-                            </div>
-                        )}
                     </div>
                 </div>
-                <div className="text-right">
-                    <p className="font-semibold">{currency}{product.price}</p>
-                    {product.mrp > product.price && (
-                        <p className="text-xs text-slate-400 line-through">{currency}{product.mrp}</p>
-                    )}
-                </div>
+                <p>{currency}{product.price}</p>
             </div>
         </Link>
     )
