@@ -19,6 +19,7 @@ model User {
   wishlist Json @default("[]")
 
     // Relations
+    notifications Notification[]
     ratings     Rating[]
     Address     Address[]
     store       Store?
@@ -170,3 +171,17 @@ model Store {
     Order   Order[]
     user    User      @relation(fields: [userId], references: [id])
 }
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String   @default("ORDER") // ORDER, SYSTEM, etc.
+  metadata  Json     @default("{}") // e.g. { orderId: "..." }
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+

@@ -103,6 +103,22 @@ export async function POST(request) {
       },
     });
 
+    // --- Notification Logic (Inngest) ---
+    try {
+      // Send event to Inngest to handle notification in background
+      const { inngest } = await import('@/src/inngest/client');
+      await inngest.send({
+        name: "notification/order.created",
+        data: {
+          orderId: order.id,
+          storeId: storeId,
+        },
+      });
+    } catch (notifyError) {
+      console.error('Failed to trigger Inngest event:', notifyError);
+    }
+    // ------------------------------------
+
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
     console.error('POST /api/orders error:', error);
