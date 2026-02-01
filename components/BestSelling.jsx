@@ -32,7 +32,7 @@ const BestSelling = () => {
 
     return (
         <div className='px-6 my-30 max-w-6xl mx-auto'>
-            <Title title='Best Selling' description={`Showing ${visibleCount} of ${products.length} products`} href='/shop' />
+            <Title title='Best Selling' description={`Showing ${visibleCount} of ${products.length} products`} href='/best-selling' />
             <div className='mt-12  grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-12'>
                 {products
                     .slice()
