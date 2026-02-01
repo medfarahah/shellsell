@@ -2,6 +2,7 @@ import { serve } from "inngest/next";
 import { inngest } from "../../../src/inngest/client";
 import { helloWorld } from "../../../src/inngest/functions";
 import { sendOrderNotification } from "../../../src/inngest/functions/notification";
+import { sendReviewNotification } from "../../../src/inngest/functions/review";
 
 // Ensure this route runs in the Node.js runtime
 export const runtime = "nodejs";
@@ -9,6 +10,6 @@ export const runtime = "nodejs";
 // Expose Inngest functions via this route
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [helloWorld, sendOrderNotification],
+  functions: [helloWorld, sendOrderNotification, sendReviewNotification],
 });
 

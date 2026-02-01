@@ -74,7 +74,37 @@ export async function POST(request) {
         productId,
         orderId,
       },
+      include: {
+        product: {
+          include: {
+            store: {
+              include: {
+                user: true
+              }
+            }
+          }
+        }
+      }
     });
+
+    // --- Notification Logic (Inngest) ---
+    try {
+      const { inngest } = await import('@/src/inngest/client');
+      await inngest.send({
+        name: "shop/review.submitted",
+        data: {
+          orderId,
+          reviewId: createdRating.id,
+          rating,
+          reviewText: review,
+          productName: createdRating.product.name,
+          sellerEmail: createdRating.product.store?.user?.email
+        },
+      });
+    } catch (notifyError) {
+      console.error('Failed to trigger Inngest event:', notifyError);
+    }
+    // ------------------------------------
 
     return NextResponse.json(createdRating, { status: 201 });
   } catch (error) {
