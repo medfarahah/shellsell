@@ -3,11 +3,10 @@ import ProductDescription from "../../../../components/ProductDescription";
 import ProductDetails from "../../../../components/ProductDetails";
 import RecommendationSlider from "../../../../components/RecommendationSlider";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trackProductView } from "../../../../lib/tracking/behaviorTracker";
 
 export default function Product() {
-
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -48,6 +47,48 @@ export default function Product() {
         }
     }, [product]);
 
+    // Build Product schema for rich results (Product + Offer + AggregateRating)
+    const productSchema = useMemo(() => {
+        if (!product) return null;
+
+        const ratings = product.rating || [];
+        const hasRatings = ratings.length > 0;
+        const averageRating = hasRatings
+            ? ratings.reduce((acc, item) => acc + item.rating, 0) / ratings.length
+            : 0;
+
+        const price = Number(product.price) || 0;
+        const currencyCode = "USD"; // Adjust if you use a different currency
+
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            image: product.images || [],
+            description: product.description,
+            category: product.category,
+            sku: product.id,
+            brand: product.store?.name || "Assal",
+            offers: {
+                "@type": "Offer",
+                url: `https://assalpay.store/product/${product.id}`,
+                priceCurrency: currencyCode,
+                price,
+                availability: "https://schema.org/InStock",
+            },
+        };
+
+        if (hasRatings) {
+            schema.aggregateRating = {
+                "@type": "AggregateRating",
+                ratingValue: Number(averageRating.toFixed(1)),
+                reviewCount: ratings.length,
+            };
+        }
+
+        return schema;
+    }, [product]);
+
     if (loading) {
         return (
             <div className="min-h-[60vh] flex items-center justify-center text-slate-400">
@@ -67,9 +108,16 @@ export default function Product() {
     return (
         <div className="mx-6">
             <div className="max-w-7xl mx-auto">
+                {productSchema && (
+                    <script
+                        type="application/ld+json"
+                        // Product structured data for better visibility in search
+                        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+                    />
+                )}
 
-                {/* Breadcrums */}
-                <div className="  text-gray-600 text-sm mt-8 mb-5">
+                {/* Breadcrumbs */}
+                <div className="text-gray-600 text-sm mt-8 mb-5">
                     Home / Products / {product.category}
                 </div>
 

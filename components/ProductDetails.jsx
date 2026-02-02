@@ -40,13 +40,32 @@ const ProductDetails = ({ product }) => {
             <div className="flex max-sm:flex-col-reverse gap-3">
                 <div className="flex sm:flex-col gap-3">
                     {product.images && product.images.length > 0 && product.images.map((image, index) => (
-                        <div key={index} onClick={() => setMainImage(product.images[index])} className="bg-slate-100 flex items-center justify-center size-26 rounded-lg group cursor-pointer">
-                            <Image src={image} className="group-hover:scale-103 group-active:scale-95 transition" alt="" width={45} height={45} />
+                        <div
+                            key={index}
+                            onClick={() => setMainImage(product.images[index])}
+                            className="bg-slate-100 flex items-center justify-center size-26 rounded-lg group cursor-pointer"
+                        >
+                            <Image
+                                src={image}
+                                className="group-hover:scale-103 group-active:scale-95 transition"
+                                alt={`${product.name} - image ${index + 1}`}
+                                width={45}
+                                height={45}
+                                loading={index === 0 ? "eager" : "lazy"}
+                            />
                         </div>
                     ))}
                 </div>
                 <div className="flex justify-center items-center h-100 sm:size-113 bg-slate-100 rounded-lg ">
-                    {mainImage && <Image src={mainImage} alt={product.name} width={250} height={250} />}
+                    {mainImage && (
+                        <Image
+                            src={mainImage}
+                            alt={product.name}
+                            width={250}
+                            height={250}
+                            priority
+                        />
+                    )}
                 </div>
             </div>
             <div className="flex-1">
