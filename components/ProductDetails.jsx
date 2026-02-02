@@ -19,22 +19,22 @@ const ProductDetails = ({ product }) => {
     const router = useRouter()
 
     const [mainImage, setMainImage] = useState(product.images[0]);
-    const [selectedColor, setSelectedColor] = useState(product.color || '');
+    const [selectedColor, setSelectedColor] = useState(product.color ? product.color.split(',')[0].trim() : '');
     const [selectedSize, setSelectedSize] = useState('');
 
     const addToCartHandler = () => {
-        dispatch(addToCart({ 
-            productId, 
-            color: selectedColor || null, 
-            size: selectedSize || null 
+        dispatch(addToCart({
+            productId,
+            color: selectedColor || null,
+            size: selectedSize || null
         }))
     }
 
     const ratings = product.rating || [];
-    const averageRating = ratings.length > 0 
-        ? ratings.reduce((acc, item) => acc + item.rating, 0) / ratings.length 
+    const averageRating = ratings.length > 0
+        ? ratings.reduce((acc, item) => acc + item.rating, 0) / ratings.length
         : 0;
-    
+
     return (
         <div className="flex max-lg:flex-col gap-12">
             <div className="flex max-sm:flex-col-reverse gap-3">
@@ -68,13 +68,23 @@ const ProductDetails = ({ product }) => {
                         {product.color && (
                             <div className="flex flex-col gap-2">
                                 <span className="font-medium text-slate-800">Color:</span>
-                                <input
-                                    type="text"
-                                    value={selectedColor}
-                                    onChange={(e) => setSelectedColor(e.target.value)}
-                                    placeholder="Enter color"
-                                    className="w-full max-w-xs p-2 px-4 outline-none border border-slate-200 rounded"
-                                />
+                                <div className="flex flex-wrap gap-2">
+                                    {product.color.split(',').map((colorName, index) => {
+                                        const color = colorName.trim();
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedColor(color)}
+                                                className={`px-4 py-1 border rounded-full text-sm font-medium transition-all ${selectedColor === color
+                                                    ? 'border-slate-800 bg-slate-800 text-white'
+                                                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                                                    }`}
+                                            >
+                                                {color}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
                         {product.sizes && product.sizes.length > 0 && (
