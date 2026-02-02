@@ -5,10 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { toggleWishlist } from '@/lib/features/wishlist/wishlistSlice'
+import { toggleWishlist } from '../lib/features/wishlist/wishlistSlice'
 import { useUser } from '@clerk/nextjs'
 import { toast } from 'react-hot-toast'
-import { trackProductClick } from '@/lib/tracking/behaviorTracker'
+import { trackProductClick } from '../lib/tracking/behaviorTracker'
 
 const ProductCard = ({ product }) => {
 
@@ -21,20 +21,20 @@ const ProductCard = ({ product }) => {
 
     // calculate the average rating of the product
     const ratings = product.rating || [];
-    const rating = ratings.length > 0 
+    const rating = ratings.length > 0
         ? Math.round(ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length)
         : 0;
 
     // Calculate vendor rating from store's products
     const calculateVendorRating = () => {
         if (!product.store) return 0;
-        
+
         // If store has products with ratings, calculate average
         const storeProducts = product.store.Product || [];
         const allRatings = storeProducts.flatMap(p => p.rating || []);
-        
+
         if (allRatings.length === 0) return 0;
-        
+
         const avgRating = allRatings.reduce((sum, r) => sum + r.rating, 0) / allRatings.length;
         return Math.round(avgRating * 10) / 10; // Round to 1 decimal
     };
@@ -79,8 +79,8 @@ const ProductCard = ({ product }) => {
     }
 
     return (
-        <Link 
-            href={`/product/${product.id}`} 
+        <Link
+            href={`/product/${product.id}`}
             className='group max-xl:mx-auto relative'
             onClick={handleProductClick}
         >

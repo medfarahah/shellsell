@@ -1,6 +1,6 @@
 'use client';
-import Loading from "@/components/Loading";
-import OrdersAreaChart from "@/components/OrdersAreaChart";
+import Loading from "../../components/Loading";
+import OrdersAreaChart from "../../components/OrdersAreaChart";
 import {
     CircleDollarSignIcon,
     ShoppingBasketIcon,

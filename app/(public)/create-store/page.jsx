@@ -1,9 +1,9 @@
 'use client'
-import { assets } from "@/assets/assets"
+import { assets } from "../../../assets/assets"
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import toast from "react-hot-toast"
-import Loading from "@/components/Loading"
+import Loading from "../../../components/Loading"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 
@@ -49,7 +49,7 @@ export default function CreateStore() {
             const res = await fetch(`/api/stores?userId=${user.id}`)
             if (!res.ok) throw new Error("Failed to check store status")
             const stores = await res.json()
-            
+
             if (stores.length > 0) {
                 const store = stores[0]
                 setAlreadySubmitted(true)
@@ -58,8 +58,8 @@ export default function CreateStore() {
                     store.status === "approved"
                         ? "Your store has been approved! You can now manage your products."
                         : store.status === "rejected"
-                        ? "Your store application was rejected. Please contact support for more information."
-                        : "Your store application is pending approval. We'll notify you once it's reviewed."
+                            ? "Your store application was rejected. Please contact support for more information."
+                            : "Your store application is pending approval. We'll notify you once it's reviewed."
                 )
                 if (store.status === "approved") {
                     setTimeout(() => {
@@ -76,7 +76,7 @@ export default function CreateStore() {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        
+
         if (!user) {
             toast.error("Please sign in to create a store")
             return

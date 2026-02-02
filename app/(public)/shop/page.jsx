@@ -1,10 +1,10 @@
 'use client'
 import { Suspense, useEffect, useState } from "react";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "../../../components/ProductCard";
 import { MoveLeftIcon, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { setProduct } from "@/lib/features/product/productSlice";
+import { setProduct } from "../../../lib/features/product/productSlice";
 
 function ShopContent() {
     // get query params ?search=abc
@@ -34,8 +34,8 @@ function ShopContent() {
 
     const filteredProducts = search
         ? products.filter((product) =>
-              product.name.toLowerCase().includes(search.toLowerCase())
-          )
+            product.name.toLowerCase().includes(search.toLowerCase())
+        )
         : products;
 
     const handleSearch = (e) => {

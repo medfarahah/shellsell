@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -89,7 +89,7 @@ export async function POST(request) {
 
     // --- Notification Logic (Inngest) ---
     try {
-      const { inngest } = await import('@/src/inngest/client');
+      const { inngest } = await import('../../../src/inngest/client');
       await inngest.send({
         name: "shop/review.submitted",
         data: {

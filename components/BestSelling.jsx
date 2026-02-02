@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import Title from './Title'
 import ProductCard from './ProductCard'
 import { useDispatch, useSelector } from 'react-redux'
-import { setProduct } from '@/lib/features/product/productSlice'
+import { setProduct } from '../lib/features/product/productSlice'
 
 const BestSelling = () => {
 

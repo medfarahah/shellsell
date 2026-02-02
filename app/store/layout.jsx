@@ -1,4 +1,4 @@
-import StoreLayout from "@/components/store/StoreLayout";
+import StoreLayout from "../../components/store/StoreLayout";
 
 export const metadata = {
     title: "Assal. - Store Dashboard",

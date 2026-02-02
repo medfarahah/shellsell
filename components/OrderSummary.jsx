@@ -2,8 +2,8 @@ import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react'
 import AddressModal from './AddressModal';
 import { useSelector, useDispatch } from 'react-redux';
-import { setAddresses } from '@/lib/features/address/addressSlice';
-import { clearCart } from '@/lib/features/cart/cartSlice';
+import { setAddresses } from '../lib/features/address/addressSlice';
+import { clearCart } from '../lib/features/cart/cartSlice';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
@@ -29,7 +29,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     useEffect(() => {
         const fetchAddresses = async () => {
             if (!user) return;
-            
+
             try {
                 const res = await fetch(`/api/addresses?userId=${user.id}`);
                 if (res.ok) {
@@ -46,7 +46,7 @@ const OrderSummary = ({ totalPrice, items }) => {
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
-        
+
         if (!couponCodeInput.trim()) {
             toast.error("Please enter a coupon code");
             return;
@@ -66,20 +66,20 @@ const OrderSummary = ({ totalPrice, items }) => {
             // Try to fetch coupon - first try public, then try new user coupons
             let res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&onlyPublic=true`);
             let coupons = res.ok ? await res.json() : [];
-            
+
             // If not found in public, try new user coupons
             if (coupons.length === 0) {
                 res = await fetch(`/api/coupons?code=${couponCodeInput.trim()}&forNewUser=true`);
                 coupons = res.ok ? await res.json() : [];
             }
-            
+
             if (coupons.length === 0) {
                 toast.error("Invalid or expired coupon code");
                 return;
             }
 
             const foundCoupon = coupons[0];
-            
+
             // Check if coupon is expired
             if (new Date(foundCoupon.expiresAt) < new Date()) {
                 toast.error("This coupon has expired");
@@ -124,13 +124,13 @@ const OrderSummary = ({ totalPrice, items }) => {
         for (const item of items) {
             // Get storeId from product's store relation or direct storeId field
             const storeId = item.storeId || item.store?.id;
-            
+
             if (!storeId) {
                 toast.error(`Product ${item.name} is missing store information`);
                 setLoading(false);
                 return;
             }
-            
+
             if (!itemsByStore[storeId]) {
                 itemsByStore[storeId] = [];
             }
@@ -149,7 +149,7 @@ const OrderSummary = ({ totalPrice, items }) => {
             // Create orders for each store
             const orderPromises = Object.entries(itemsByStore).map(async ([storeId, storeItems]) => {
                 const storeTotal = storeItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const finalTotal = coupon 
+                const finalTotal = coupon
                     ? storeTotal - (coupon.discount / 100 * storeTotal)
                     : storeTotal;
 
@@ -185,7 +185,7 @@ const OrderSummary = ({ totalPrice, items }) => {
 
             // Clear cart
             dispatch(clearCart());
-            
+
             toast.success("Order placed successfully!");
             router.push('/orders');
         } catch (err) {
@@ -284,8 +284,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <p>Total:</p>
                 <p className='font-medium text-right'>{currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}</p>
             </div>
-            <button 
-                onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'Placing order...', success: 'Order placed!', error: 'Failed to place order' })} 
+            <button
+                onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'Placing order...', success: 'Order placed!', error: 'Failed to place order' })}
                 disabled={loading || !selectedAddress || items.length === 0}
                 className={`w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all ${(loading || !selectedAddress || items.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
@@ -293,8 +293,8 @@ const OrderSummary = ({ totalPrice, items }) => {
             </button>
 
             {showAddressModal && (
-                <AddressModal 
-                    setShowAddressModal={setShowAddressModal} 
+                <AddressModal
+                    setShowAddressModal={setShowAddressModal}
                     onAddressAdded={async () => {
                         // Refresh addresses after adding new one
                         if (user) {

@@ -1,8 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import Title from '@/components/Title'
-import ProductCard from '@/components/ProductCard'
-import Loading from '@/components/Loading'
+import Title from '../../components/Title'
+import ProductCard from '../../components/ProductCard'
+import Loading from '../../components/Loading'
 
 const BestSellingPage = () => {
     const [products, setProducts] = useState([])

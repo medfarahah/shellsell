@@ -3,7 +3,7 @@ import {
   getRelatedProducts,
   getTrendingProducts,
   getPersonalizedRecommendations,
-} from '@/lib/recommendation/recommendationService';
+} from '../../../lib/recommendation/recommendationService';
 
 export const runtime = 'nodejs';
 

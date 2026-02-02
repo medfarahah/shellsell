@@ -1,5 +1,5 @@
 'use client'
-import { assets } from "@/assets/assets"
+import { assets } from "../../../assets/assets"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
@@ -62,7 +62,7 @@ export default function StoreAddProduct() {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
-        
+
         if (!user) {
             toast.error("Please sign in to add products")
             return
@@ -148,7 +148,7 @@ export default function StoreAddProduct() {
             }
 
             toast.success("Product added successfully!")
-            
+
             // Reset form
             setProductInfo({
                 name: "",
@@ -161,7 +161,7 @@ export default function StoreAddProduct() {
                 sizesInput: "",
             })
             setImages({ 1: null, 2: null, 3: null, 4: null })
-            
+
             // Redirect to manage products page
             router.push("/store/manage-product")
         } catch (err) {

@@ -1,9 +1,9 @@
 'use client';
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "../../../../components/ProductCard";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MailIcon, MapPinIcon } from "lucide-react";
-import Loading from "@/components/Loading";
+import Loading from "../../../../components/Loading";
 import Image from "next/image";
 
 export default function StoreShop() {
@@ -63,7 +63,7 @@ export default function StoreShop() {
                                 <MailIcon className="w-4 h-4 text-gray-500 mr-2" />
                                 <span>{storeInfo.email}</span>
                             </div>
-                           
+
                         </div>
                     </div>
                 </div>

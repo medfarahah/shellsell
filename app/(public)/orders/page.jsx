@@ -1,7 +1,7 @@
 'use client';
-import PageTitle from "@/components/PageTitle";
+import PageTitle from "../../../components/PageTitle";
 import { useEffect, useState } from "react";
-import OrderItem from "@/components/OrderItem";
+import OrderItem from "../../../components/OrderItem";
 import { useUser } from "@clerk/nextjs";
 
 export default function Orders() {

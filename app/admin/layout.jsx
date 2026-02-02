@@ -1,4 +1,4 @@
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "../../components/admin/AdminLayout";
 
 export const metadata = {
     title: "Assal. - Admin",

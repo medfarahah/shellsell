@@ -1,8 +1,8 @@
 'use client'
-import Counter from "@/components/Counter";
-import OrderSummary from "@/components/OrderSummary";
-import PageTitle from "@/components/PageTitle";
-import { deleteItemFromCart, updateCartItem } from "@/lib/features/cart/cartSlice";
+import Counter from "../../../components/Counter";
+import OrderSummary from "../../../components/OrderSummary";
+import PageTitle from "../../../components/PageTitle";
+import { deleteItemFromCart, updateCartItem } from "../../../lib/features/cart/cartSlice";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 export default function Cart() {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
-    
+
     const { cartItems } = useSelector(state => state.cart);
     const products = useSelector(state => state.product.list);
 
@@ -30,7 +30,7 @@ export default function Cart() {
                 const quantity = typeof value === 'number' ? value : (value?.quantity || 0);
                 const color = typeof value === 'object' ? value.color : null;
                 const size = typeof value === 'object' ? value.size : null;
-                
+
                 cartArray.push({
                     ...product,
                     quantity,
@@ -93,7 +93,7 @@ export default function Cart() {
                                                 <p className="max-sm:text-sm">{item.name}</p>
                                                 <p className="text-xs text-slate-500">{item.category}</p>
                                                 <p>{currency}{item.price}</p>
-                                                
+
                                                 {/* Color Selection */}
                                                 {item.color && (
                                                     <div className="mt-2">
@@ -107,7 +107,7 @@ export default function Cart() {
                                                         />
                                                     </div>
                                                 )}
-                                                
+
                                                 {/* Size Selection */}
                                                 {item.sizes && item.sizes.length > 0 && (
                                                     <div className="mt-2">

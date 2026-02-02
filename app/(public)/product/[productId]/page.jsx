@@ -1,10 +1,10 @@
 'use client'
-import ProductDescription from "@/components/ProductDescription";
-import ProductDetails from "@/components/ProductDetails";
-import RecommendationSlider from "@/components/RecommendationSlider";
+import ProductDescription from "../../../../components/ProductDescription";
+import ProductDetails from "../../../../components/ProductDetails";
+import RecommendationSlider from "../../../../components/RecommendationSlider";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { trackProductView } from "@/lib/tracking/behaviorTracker";
+import { trackProductView } from "../../../../lib/tracking/behaviorTracker";
 
 export default function Product() {
 
@@ -17,7 +17,7 @@ export default function Product() {
             setLoading(false);
             return;
         }
-        
+
         try {
             const res = await fetch(`/api/products/${productId}`);
             if (!res.ok) {
@@ -80,7 +80,7 @@ export default function Product() {
                 <ProductDescription product={product} />
 
                 {/* Related Products Recommendations */}
-                <RecommendationSlider 
+                <RecommendationSlider
                     title="You May Also Like"
                     limit={8}
                     className="mt-12"

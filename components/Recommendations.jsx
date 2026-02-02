@@ -1,6 +1,6 @@
 'use client';
 
-import { useRelatedProducts, useTrendingProducts, usePersonalizedRecommendations } from '@/lib/recommendation/useRecommendations';
+import { useRelatedProducts, useTrendingProducts, usePersonalizedRecommendations } from '../lib/recommendation/useRecommendations';
 import ProductCard from './ProductCard';
 import Loading from './Loading';
 import { useUser } from '@clerk/nextjs';

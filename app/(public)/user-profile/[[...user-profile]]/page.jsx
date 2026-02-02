@@ -3,8 +3,8 @@ import { UserProfile } from "@clerk/nextjs";
 import { Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import OrderItem from "@/components/OrderItem";
-import Loading from "@/components/Loading";
+import OrderItem from "../../../../components/OrderItem";
+import Loading from "../../../../components/Loading";
 
 export default function UserProfilePage() {
     const { user } = useUser();
@@ -35,7 +35,7 @@ export default function UserProfilePage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center py-8 px-4">
-            <UserProfile 
+            <UserProfile
                 routing="path"
                 path="/user-profile"
                 appearance={{
@@ -45,9 +45,9 @@ export default function UserProfilePage() {
                     }
                 }}
             >
-                <UserProfile.Page 
-                    label="My Orders" 
-                    labelIcon={<Package size={16} />} 
+                <UserProfile.Page
+                    label="My Orders"
+                    labelIcon={<Package size={16} />}
                     url="orders"
                 >
                     <div className="p-6">
@@ -75,15 +75,14 @@ export default function UserProfilePage() {
                                                     ${order.total.toFixed(2)}
                                                 </p>
                                                 <span
-                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                        order.status === 'DELIVERED'
+                                                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${order.status === 'DELIVERED'
                                                             ? 'bg-green-100 text-green-700'
                                                             : order.status === 'SHIPPED'
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : order.status === 'PROCESSING'
-                                                            ? 'bg-yellow-100 text-yellow-700'
-                                                            : 'bg-slate-100 text-slate-700'
-                                                    }`}
+                                                                ? 'bg-blue-100 text-blue-700'
+                                                                : order.status === 'PROCESSING'
+                                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                                    : 'bg-slate-100 text-slate-700'
+                                                        }`}
                                                 >
                                                     {order.status.replace(/_/g, ' ')}
                                                 </span>

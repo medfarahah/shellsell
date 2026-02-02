@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -17,14 +17,14 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ message: 'Coupon deleted successfully' });
   } catch (error) {
     console.error('DELETE /api/coupons/[code] error', error);
-    
+
     if (error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Coupon not found' },
         { status: 404 },
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Failed to delete coupon' },
       { status: 500 },

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useUser } from '@clerk/nextjs';
 import { useDispatch } from 'react-redux';
-import { addRating } from '@/lib/features/rating/ratingSlice';
+import { addRating } from '../lib/features/rating/ratingSlice';
 
 const RatingModal = ({ ratingModal, setRatingModal }) => {
     const { user } = useUser();

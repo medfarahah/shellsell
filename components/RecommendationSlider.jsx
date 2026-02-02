@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import ProductCard from './ProductCard';
 import Loading from './Loading';
 import Title from './Title'; // Added Title import
-import { getGuestBehavior } from '@/lib/tracking/behaviorTracker';
+import { getGuestBehavior } from '../lib/tracking/behaviorTracker';
 
 /**
  * RecommendationSlider Component

@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -57,14 +57,14 @@ export async function PATCH(request, { params }) {
     return NextResponse.json(store);
   } catch (error) {
     console.error('PATCH /api/stores/[id] error', error);
-    
+
     if (error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Store not found' },
         { status: 404 },
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Failed to update store' },
       { status: 500 },

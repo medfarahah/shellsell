@@ -3,13 +3,13 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Package, User, MapPin, ShoppingBag, Heart, Tag, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import Loading from "@/components/Loading";
-import OrderItem from "@/components/OrderItem";
+import Loading from "../../../components/Loading";
+import OrderItem from "../../../components/OrderItem";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import AddressModal from "@/components/AddressModal";
+import AddressModal from "../../../components/AddressModal";
 import { useDispatch } from "react-redux";
-import { setAddresses } from "@/lib/features/address/addressSlice";
+import { setAddresses } from "../../../lib/features/address/addressSlice";
 
 export default function AccountPage() {
     const { user, isLoaded } = useUser();
@@ -145,8 +145,8 @@ export default function AccountPage() {
                         onClick={() => setActiveTab('orders')}
                         title={`My Orders (${orders.length})`}
                         className={`px-4 py-3 font-medium transition-colors ${activeTab === 'orders'
-                                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
+                            ? 'text-indigo-600 border-b-2 border-indigo-600'
+                            : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <div className="flex items-center justify-center">
@@ -157,8 +157,8 @@ export default function AccountPage() {
                         onClick={() => setActiveTab('addresses')}
                         title={`Addresses (${addresses.length})`}
                         className={`px-4 py-3 font-medium transition-colors ${activeTab === 'addresses'
-                                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
+                            ? 'text-indigo-600 border-b-2 border-indigo-600'
+                            : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <div className="flex items-center justify-center">
@@ -169,8 +169,8 @@ export default function AccountPage() {
                         onClick={() => setActiveTab('wishlist')}
                         title={`Wishlist (${wishlist.length})`}
                         className={`px-4 py-3 font-medium transition-colors ${activeTab === 'wishlist'
-                                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
+                            ? 'text-indigo-600 border-b-2 border-indigo-600'
+                            : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <div className="flex items-center justify-center">
@@ -181,8 +181,8 @@ export default function AccountPage() {
                         onClick={() => setActiveTab('coupons')}
                         title={`Coupons (${coupons.length})`}
                         className={`px-4 py-3 font-medium transition-colors ${activeTab === 'coupons'
-                                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
+                            ? 'text-indigo-600 border-b-2 border-indigo-600'
+                            : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <div className="flex items-center justify-center">
@@ -193,8 +193,8 @@ export default function AccountPage() {
                         onClick={() => setActiveTab('profile')}
                         title="Profile"
                         className={`px-4 py-3 font-medium transition-colors ${activeTab === 'profile'
-                                ? 'text-indigo-600 border-b-2 border-indigo-600'
-                                : 'text-slate-500 hover:text-slate-700'
+                            ? 'text-indigo-600 border-b-2 border-indigo-600'
+                            : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         <div className="flex items-center justify-center">
@@ -238,12 +238,12 @@ export default function AccountPage() {
                                                     </p>
                                                     <span
                                                         className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${order.status === 'DELIVERED'
-                                                                ? 'bg-green-100 text-green-700'
-                                                                : order.status === 'SHIPPED'
-                                                                    ? 'bg-blue-100 text-blue-700'
-                                                                    : order.status === 'PROCESSING'
-                                                                        ? 'bg-yellow-100 text-yellow-700'
-                                                                        : 'bg-slate-100 text-slate-700'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : order.status === 'SHIPPED'
+                                                                ? 'bg-blue-100 text-blue-700'
+                                                                : order.status === 'PROCESSING'
+                                                                    ? 'bg-yellow-100 text-yellow-700'
+                                                                    : 'bg-slate-100 text-slate-700'
                                                             }`}
                                                     >
                                                         {order.status.replace(/_/g, ' ')}
@@ -415,8 +415,8 @@ export default function AccountPage() {
                                                 <div
                                                     key={coupon.code}
                                                     className={`border rounded-lg p-5 transition-shadow ${isExpired
-                                                            ? 'border-slate-200 bg-slate-50 opacity-60'
-                                                            : 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-lg'
+                                                        ? 'border-slate-200 bg-slate-50 opacity-60'
+                                                        : 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-lg'
                                                         }`}
                                                 >
                                                     <div className="flex items-start justify-between mb-3">

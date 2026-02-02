@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -9,7 +9,7 @@ export async function GET(_request, { params }) {
     // Handle both sync and async params (Next.js 15+ compatibility)
     const resolvedParams = params instanceof Promise ? await params : params;
     const { id } = resolvedParams || {};
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Product ID is required' },
@@ -43,11 +43,11 @@ export async function GET(_request, { params }) {
         },
       },
     });
-    
+
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
-    
+
     return NextResponse.json(product);
   } catch (error) {
     console.error('GET /api/products/[id] error', error);
@@ -63,7 +63,7 @@ export async function PUT(request, { params }) {
   try {
     const resolvedParams = params instanceof Promise ? await params : params;
     const { id } = resolvedParams || {};
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Product ID is required' },
@@ -91,7 +91,7 @@ export async function DELETE(_request, { params }) {
   try {
     const resolvedParams = params instanceof Promise ? await params : params;
     const { id } = resolvedParams || {};
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Product ID is required' },
@@ -105,14 +105,14 @@ export async function DELETE(_request, { params }) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/products/[id] error', error);
-    
+
     if (error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 },
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Failed to delete product' },
       { status: 500 },

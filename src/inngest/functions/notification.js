@@ -1,6 +1,6 @@
 import { inngest } from "../client";
-import prisma from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import prisma from "../../../lib/prisma";
+import { sendEmail } from "../../../lib/email";
 
 export const sendOrderNotification = inngest.createFunction(
     { id: "send-order-notification" },

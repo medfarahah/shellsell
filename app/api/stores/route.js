@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -135,7 +135,7 @@ export async function POST(request) {
     return NextResponse.json(store, { status: 201 });
   } catch (error) {
     console.error('POST /api/stores error', error);
-    
+
     // Return more specific error messages
     if (error.code === 'P2002') {
       return NextResponse.json(
@@ -143,7 +143,7 @@ export async function POST(request) {
         { status: 400 },
       );
     }
-    
+
     return NextResponse.json(
       { error: error.message || 'Failed to create store' },
       { status: 500 },

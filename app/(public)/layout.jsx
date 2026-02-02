@@ -1,8 +1,8 @@
 'use client'
-import Banner from "@/components/Banner";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import BottomNav from "@/components/BottomNav";
+import Banner from "../../components/Banner";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import BottomNav from "../../components/BottomNav";
 
 export default function PublicLayout({ children }) {
 

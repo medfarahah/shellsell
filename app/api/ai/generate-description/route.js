@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chatWithAssistant } from "@/lib/openai";
+import { chatWithAssistant } from "../../../../lib/openai";
 
 export const runtime = "nodejs";
 
@@ -31,8 +31,8 @@ export async function POST(request) {
       typeof message?.content === "string"
         ? message.content
         : Array.isArray(message?.content)
-        ? message.content.map((c) => c.text || c).join("\n")
-        : "";
+          ? message.content.map((c) => c.text || c).join("\n")
+          : "";
 
     if (!description.trim()) {
       return NextResponse.json(

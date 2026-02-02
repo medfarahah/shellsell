@@ -4,7 +4,7 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { useUser } from "@clerk/nextjs"
 import { useDispatch } from "react-redux"
-import { addAddress } from "@/lib/features/address/addressSlice"
+import { addAddress } from "../lib/features/address/addressSlice"
 
 const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
     const { user } = useUser()
@@ -32,7 +32,7 @@ const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        
+
         if (!user) {
             toast.error("Please sign in to add an address")
             return
@@ -74,15 +74,15 @@ const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
 
             // Add to Redux state
             dispatch(addAddress(data))
-            
+
             // Callback to refresh addresses in parent component
             if (onAddressAdded) {
                 onAddressAdded();
             }
-            
+
             toast.success("Address added successfully!")
             setShowAddressModal(false)
-            
+
             // Reset form
             setAddress({
                 name: '',
