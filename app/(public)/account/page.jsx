@@ -143,67 +143,62 @@ export default function AccountPage() {
                 <div className="flex gap-2 mb-6 border-b border-slate-200">
                     <button
                         onClick={() => setActiveTab('orders')}
-                        className={`px-4 py-2 font-medium transition-colors ${
-                            activeTab === 'orders'
+                        title={`My Orders (${orders.length})`}
+                        className={`px-4 py-3 font-medium transition-colors ${activeTab === 'orders'
                                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                                 : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <Package size={18} />
-                            My Orders ({orders.length})
+                        <div className="flex items-center justify-center">
+                            <Package size={20} />
                         </div>
                     </button>
                     <button
                         onClick={() => setActiveTab('addresses')}
-                        className={`px-4 py-2 font-medium transition-colors ${
-                            activeTab === 'addresses'
+                        title={`Addresses (${addresses.length})`}
+                        className={`px-4 py-3 font-medium transition-colors ${activeTab === 'addresses'
                                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                                 : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <MapPin size={18} />
-                            Addresses ({addresses.length})
+                        <div className="flex items-center justify-center">
+                            <MapPin size={20} />
                         </div>
                     </button>
                     <button
                         onClick={() => setActiveTab('wishlist')}
-                        className={`px-4 py-2 font-medium transition-colors ${
-                            activeTab === 'wishlist'
+                        title={`Wishlist (${wishlist.length})`}
+                        className={`px-4 py-3 font-medium transition-colors ${activeTab === 'wishlist'
                                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                                 : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <Heart size={18} />
-                            Wishlist ({wishlist.length})
+                        <div className="flex items-center justify-center">
+                            <Heart size={20} />
                         </div>
                     </button>
                     <button
                         onClick={() => setActiveTab('coupons')}
-                        className={`px-4 py-2 font-medium transition-colors ${
-                            activeTab === 'coupons'
+                        title={`Coupons (${coupons.length})`}
+                        className={`px-4 py-3 font-medium transition-colors ${activeTab === 'coupons'
                                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                                 : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <Tag size={18} />
-                            Coupons ({coupons.length})
+                        <div className="flex items-center justify-center">
+                            <Tag size={20} />
                         </div>
                     </button>
                     <button
                         onClick={() => setActiveTab('profile')}
-                        className={`px-4 py-2 font-medium transition-colors ${
-                            activeTab === 'profile'
+                        title="Profile"
+                        className={`px-4 py-3 font-medium transition-colors ${activeTab === 'profile'
                                 ? 'text-indigo-600 border-b-2 border-indigo-600'
                                 : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                            }`}
                     >
-                        <div className="flex items-center gap-2">
-                            <User size={18} />
-                            Profile
+                        <div className="flex items-center justify-center">
+                            <User size={20} />
                         </div>
                     </button>
                 </div>
@@ -242,15 +237,14 @@ export default function AccountPage() {
                                                         ${order.total.toFixed(2)}
                                                     </p>
                                                     <span
-                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                                            order.status === 'DELIVERED'
+                                                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${order.status === 'DELIVERED'
                                                                 ? 'bg-green-100 text-green-700'
                                                                 : order.status === 'SHIPPED'
-                                                                ? 'bg-blue-100 text-blue-700'
-                                                                : order.status === 'PROCESSING'
-                                                                ? 'bg-yellow-100 text-yellow-700'
-                                                                : 'bg-slate-100 text-slate-700'
-                                                        }`}
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : order.status === 'PROCESSING'
+                                                                        ? 'bg-yellow-100 text-yellow-700'
+                                                                        : 'bg-slate-100 text-slate-700'
+                                                            }`}
                                                     >
                                                         {order.status.replace(/_/g, ' ')}
                                                     </span>
@@ -420,11 +414,10 @@ export default function AccountPage() {
                                             return (
                                                 <div
                                                     key={coupon.code}
-                                                    className={`border rounded-lg p-5 transition-shadow ${
-                                                        isExpired
+                                                    className={`border rounded-lg p-5 transition-shadow ${isExpired
                                                             ? 'border-slate-200 bg-slate-50 opacity-60'
                                                             : 'border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 hover:shadow-lg'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div className="flex items-start justify-between mb-3">
                                                         <div className="flex-1">
