@@ -1,6 +1,6 @@
 'use client';
-import StoreInfo from "../../components/admin/StoreInfo";
-import Loading from "../../components/Loading";
+import StoreInfo from "../../../components/admin/StoreInfo";
+import Loading from "../../../components/Loading";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
