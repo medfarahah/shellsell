@@ -24,6 +24,8 @@ const Footer = () => {
             title: "WEBSITE?",
             links: [
                 { text: "Home", path: '/', icon: null },
+                { text: "About", path: '/about', icon: null },
+                { text: "Contact", path: '/contact', icon: null },
                 { text: "Privacy Policy", path: '/', icon: null },
                 { text: "Become Plus Member", path: '/pricing', icon: null },
                 { text: "Create Your Store", path: '/create-store', icon: null },
@@ -32,9 +34,9 @@ const Footer = () => {
         {
             title: "CONTACT",
             links: [
-                { text: "+25377485495", path: '/', icon: PhoneIcon },
-                { text: "assalpay@gmail.com", path: '/', icon: MailIcon },
-                { text: "djibouti-ville", path: '/', icon: MapPinIcon }
+                { text: "+25377485495", path: 'tel:+25377485495', icon: PhoneIcon },
+                { text: "assalpay@gmail.com", path: 'mailto:assalpay@gmail.com', icon: MailIcon },
+                { text: "djibouti-ville", path: '/contact', icon: MapPinIcon }
             ]
         }
     ];
