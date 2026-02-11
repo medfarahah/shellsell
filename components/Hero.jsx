@@ -1,9 +1,11 @@
 'use client'
-import { assets } from '../assets/assets'
+import { hero_model_img, hero_product_img1, hero_product_img2 } from '../assets/assets'
 import { ArrowRightIcon, ChevronRightIcon } from 'lucide-react'
 import Image from 'next/image'
 import React from 'react'
-import CategoriesMarquee from './CategoriesMarquee'
+import dynamic from 'next/dynamic'
+
+const CategoriesMarquee = dynamic(() => import('./CategoriesMarquee'), { ssr: false })
 
 const Hero = () => {
 
@@ -29,9 +31,10 @@ const Hero = () => {
                     </div>
                     <Image
                         className='sm:absolute bottom-0 right-0 md:right-10 w-full sm:max-w-sm'
-                        src={assets.hero_model_img}
+                        src={hero_model_img}
                         alt="Customer enjoying new gadgets from Assal online store"
                         priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                 </div>
                 <div className='flex flex-col md:flex-row xl:flex-col gap-5 w-full xl:max-w-sm text-sm text-slate-600'>
@@ -42,9 +45,10 @@ const Hero = () => {
                         </div>
                         <Image
                             className='w-35'
-                            src={assets.hero_product_img1}
+                            src={hero_product_img1}
                             alt="Featured electronic gadget on Assal"
                             loading="lazy"
+                            sizes="(max-width: 768px) 50vw, 25vw"
                         />
                     </div>
                     <div className='flex-1 flex items-center justify-between w-full bg-blue-200 rounded-3xl p-6 px-8 group'>
@@ -54,9 +58,10 @@ const Hero = () => {
                         </div>
                         <Image
                             className='w-35'
-                            src={assets.hero_product_img2}
+                            src={hero_product_img2}
                             alt="Discounted gadgets and accessories on Assal"
                             loading="lazy"
+                            sizes="(max-width: 768px) 50vw, 25vw"
                         />
                     </div>
                 </div>
