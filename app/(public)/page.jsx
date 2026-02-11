@@ -1,10 +1,26 @@
-'use client'
-import BestSelling from "../../components/BestSelling";
+'use client';
+
+import dynamic from 'next/dynamic';
 import Hero from "../../components/Hero";
-import Newsletter from "../../components/Newsletter";
-import OurSpecs from "../../components/OurSpec";
 import LatestProducts from "../../components/LatestProducts";
-import RecommendationSlider from "../../components/RecommendationSlider";
+
+// Lazy load heavy components
+const RecommendationSlider = dynamic(
+    () => import("../../components/RecommendationSlider"),
+    { ssr: false }
+);
+const BestSelling = dynamic(
+    () => import("../../components/BestSelling"),
+    { ssr: false }
+);
+const OurSpecs = dynamic(
+    () => import("../../components/OurSpec"),
+    { ssr: false }
+);
+const Newsletter = dynamic(
+    () => import("../../components/Newsletter"),
+    { ssr: false }
+);
 
 export default function Home() {
     return (
